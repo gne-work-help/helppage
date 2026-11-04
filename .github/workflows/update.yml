@@ -1,0 +1,118 @@
+name: 자료 목록 갱신·배포
+
+# - 매일 새벽 4시(KST): 웹하드 파일 이름 수집 → data 브랜치에 덮어쓰기 → 사이트 배포
+# - main에 수정이 올라오면: 마지막 수집 결과로 바로 사이트 배포 (수집은 안 함)
+# - Actions 탭의 [Run workflow] 단추로 언제든 수동 실행 가능
+# 수집 결과는 data 브랜치에 기록 1개로만 보관합니다(매번 덮어씀). 저장소 기록은 늘지 않습니다.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 19 * * *'
+  workflow_dispatch:
+    inputs:
+      keep_days:
+        description: '실행·배포 기록 보관 일수 (0이면 최신 것만 남기고 모두 정리)'
+        default: '30'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  actions: write
+  deployments: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    name: 파일 이름 수집
+    if: github.event_name != 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 이전 수집 결과 가져오기
+        run: |
+          mkdir -p data
+          if git ls-remote --exit-code --heads origin data >/dev/null 2>&1; then
+            git fetch --depth 1 origin data
+            git archive FETCH_HEAD | tar -x -C data
+          fi
+
+      - name: 웹하드에서 파일 이름 수집
+        run: python3 collector/collect.py --page index.html --data data --fallback files.js
+
+      - name: 수집 결과 저장 (data 브랜치 덮어쓰기)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f data/files.json ] || { echo "저장할 결과 없음"; exit 0; }
+          cd data
+          git init -q -b data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "자료 목록 (자동 관리 — 매번 덮어씀)"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" data:data
+          echo "data 브랜치 저장 완료"
+
+      - name: 예약 실행 유지
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/update.yml/enable" || true
+
+      - name: 지난 실행·배포 기록 정리 (기본 30일)
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          KEEP_DAYS: ${{ inputs.keep_days || '30' }}
+        run: |
+          cutoff=$(date -u -d "${KEEP_DAYS} days ago" +%Y-%m-%dT%H:%M:%SZ)
+          echo "기준: ${cutoff} 이전 기록 정리"
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/actions/runs?per_page=100&created=%3C${cutoff}" --jq '.workflow_runs[] | select(.status == "completed") | .id' \
+            | while read -r id; do gh api -X DELETE "repos/${GITHUB_REPOSITORY}/actions/runs/${id}" >/dev/null && echo "실행 기록 삭제: ${id}" || true; done
+          gh api --paginate "repos/${GITHUB_REPOSITORY}/deployments?per_page=100" --jq '.[] | "\(.id) \(.created_at)"' \
+            | tail -n +2 | while read -r id created; do
+                [[ "$created" < "$cutoff" ]] || continue
+                gh api -X POST "repos/${GITHUB_REPOSITORY}/deployments/${id}/statuses" -f state=inactive >/dev/null 2>&1 || true
+                gh api -X DELETE "repos/${GITHUB_REPOSITORY}/deployments/${id}" >/dev/null && echo "배포 기록 삭제: ${id}" || true
+              done
+
+  deploy:
+    name: 사이트 배포
+    needs: collect
+    if: always()
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: 사이트 파일 준비
+        run: |
+          mkdir -p _site data
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'collector' --exclude 'data' --exclude '_site' --exclude 'README.md' ./ _site/
+          if git ls-remote --exit-code --heads origin data >/dev/null 2>&1; then
+            git fetch --depth 1 origin data
+            git archive FETCH_HEAD | tar -x -C data
+          fi
+          if [ -f data/files.json ]; then
+            python3 collector/collect.py --build-js data/files.json _site/files.js
+          else
+            echo "data 브랜치 결과가 없어 저장소의 files.js를 그대로 씁니다."
+          fi
+          ls -la _site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

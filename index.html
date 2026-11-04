@@ -1,0 +1,2280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경상남도교육청 학교업무 도움자료</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!--
+      [#2 동적 색상 메모] data.js의 color로 조합되는 bg-{color}-100, text-{color}-600 등은
+      이 Play CDN 버전에서 런타임 DOM 스캔으로 자동 생성되므로 별도 설정 없이 정상 동작한다.
+      ※ Play CDN에는 safelist를 넣지 말 것 — 광범위 패턴이 초기화를 멈춰 페이지 로딩이 멈춘다.
+        '빌드형 Tailwind'로 전환할 때만 tailwind.config.js에 아래를 넣으면 purge로 색이 사라지지 않는다:
+        safelist: [{ pattern: /^(bg|text)-(red|violet|teal|pink|amber|lime|fuchsia|emerald|cyan|blue|slate|green|sky|rose|purple|orange|indigo)-(100|400|500|600)$/, variants: ['hover','group-hover'] }]
+    -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Noto Sans KR 폰트를 기본 폰트로 설정 */
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        /* 배경 래퍼 */
+        .bg-nature-wrap {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            background: linear-gradient(180deg, #eaf5f0 0%, #f2f8f5 15%, #f7faf9 40%, #f4f9f6 70%, #eef6f1 100%);
+        }
+        .bg-nature-wrap > div, .bg-nature-wrap > svg {
+            position: absolute;
+        }
+        /* 왼쪽 상단 산 장식 */
+        .bg-mountain-left {
+            top: 0; left: 0;
+            width: 350px; height: 300px;
+        }
+        /* 오른쪽 상단 산 장식 */
+        .bg-mountain-right {
+            top: 0; right: 0;
+            width: 300px; height: 280px;
+        }
+        /* 왼쪽 하단 장식 */
+        .bg-bottom-left {
+            bottom: 0; left: 0;
+            width: 400px; height: 300px;
+        }
+        /* 오른쪽 하단 장식 */
+        .bg-bottom-right {
+            bottom: 0; right: 0;
+            width: 380px; height: 280px;
+        }
+        /* 중간 좌측 장식 */
+        .bg-mid-left {
+            top: 40%; left: 0;
+            width: 200px; height: 250px;
+            transform: translateY(-50%);
+        }
+        /* 중간 우측 장식 */
+        .bg-mid-right {
+            top: 45%; right: 0;
+            width: 180px; height: 220px;
+            transform: translateY(-50%);
+        }
+        /* 학교 일러스트 */
+        .school-illustration {
+            position: absolute;
+            top: 40px;
+            right: 80px;
+            width: 140px;
+            height: 140px;
+            z-index: 1;
+            pointer-events: none;
+        }
+        @media (max-width: 768px) {
+            .school-illustration {
+                width: 90px; height: 90px;
+                top: 20px; right: 20px;
+            }
+            .bg-mountain-left { width: 200px; height: 180px; }
+            .bg-mountain-right { width: 180px; height: 160px; }
+            .bg-bottom-left { width: 250px; height: 200px; }
+            .bg-bottom-right { width: 230px; height: 180px; }
+            .bg-mid-left { width: 120px; height: 160px; }
+            .bg-mid-right { width: 110px; height: 140px; }
+        }
+        /* 카드 등장 애니메이션 */
+        @keyframes cardEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            60% {
+                opacity: 1;
+                transform: translateY(-6px) scale(1.02);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .card-entrance {
+            opacity: 0;
+            animation: cardEntrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* 스프링 바운스 슬라이드 애니메이션 */
+        .slide-content {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: grid-template-rows 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.3s ease,
+                        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .slide-content > * {
+            overflow: hidden;
+        }
+        .slide-content.open {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            transform: translateY(0);
+            transition: grid-template-rows 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.4s ease 0.05s,
+                        transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        /* 항목 줄: 한글은 단어 단위로 줄바꿈 (단어 중간에서 끊기지 않게) */
+        .item-row .item-title { word-break: keep-all; overflow-wrap: anywhere; }
+        .item-row .btn-group { display: flex; flex-shrink: 0; gap: 0.25rem; align-items: center; }
+    </style>
+</head>
+<body class="min-h-screen" style="background: #f7faf9;">
+    <div class="bg-nature-wrap">
+        <!-- 왼쪽 상단 수채화 산 장식 -->
+        <div class="bg-mountain-left">
+            <svg viewBox="0 0 400 320" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.7;">
+                <ellipse cx="60" cy="0" rx="200" ry="120" fill="url(#cloudL1)"/>
+                <path d="M0 320 L0 140 Q30 80 80 100 Q130 50 180 90 Q220 40 270 80 Q310 60 350 100 Q380 130 400 160 L400 320Z" fill="url(#mountainL1)"/>
+                <path d="M0 320 L0 180 Q40 130 100 160 Q150 110 200 140 Q250 100 300 140 L350 320Z" fill="url(#mountainL2)"/>
+                <path d="M0 320 L0 220 Q50 180 120 210 Q180 170 250 200 L300 320Z" fill="url(#mountainL3)"/>
+                <defs>
+                    <linearGradient id="cloudL1" x1="0" y1="0" x2="200" y2="120">
+                        <stop offset="0%" stop-color="#b8dce8" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="#d4eef5" stop-opacity="0.1"/>
+                    </linearGradient>
+                    <linearGradient id="mountainL1" x1="100" y1="40" x2="100" y2="320">
+                        <stop offset="0%" stop-color="#8cc5a8" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#b5dcc5" stop-opacity="0.1"/>
+                    </linearGradient>
+                    <linearGradient id="mountainL2" x1="80" y1="100" x2="80" y2="320">
+                        <stop offset="0%" stop-color="#a3d4b7" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#c8e6d2" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <linearGradient id="mountainL3" x1="60" y1="170" x2="60" y2="320">
+                        <stop offset="0%" stop-color="#bce0cb" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#ddf0e3" stop-opacity="0.05"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        <!-- 오른쪽 상단 수채화 산 장식 -->
+        <div class="bg-mountain-right">
+            <svg viewBox="0 0 350 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.6;">
+                <ellipse cx="300" cy="0" rx="180" ry="100" fill="url(#cloudR1)"/>
+                <path d="M0 160 Q40 80 100 110 Q150 50 200 80 Q250 30 300 70 Q330 50 350 80 L350 300 L0 300Z" fill="url(#mountainR1)"/>
+                <path d="M50 300 Q80 140 150 170 Q200 120 260 150 Q310 110 350 140 L350 300Z" fill="url(#mountainR2)"/>
+                <path d="M100 300 Q140 200 200 220 Q260 180 320 210 L350 300Z" fill="url(#mountainR3)"/>
+                <defs>
+                    <linearGradient id="cloudR1" x1="200" y1="0" x2="350" y2="100">
+                        <stop offset="0%" stop-color="#a8d1e0" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#c8e4ef" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <linearGradient id="mountainR1" x1="200" y1="30" x2="200" y2="300">
+                        <stop offset="0%" stop-color="#7fbfdb" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#b5d8e8" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <linearGradient id="mountainR2" x1="200" y1="110" x2="200" y2="300">
+                        <stop offset="0%" stop-color="#95cada" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#c5e2ed" stop-opacity="0.05"/>
+                    </linearGradient>
+                    <linearGradient id="mountainR3" x1="220" y1="180" x2="220" y2="300">
+                        <stop offset="0%" stop-color="#a8d5e2" stop-opacity="0.2"/>
+                        <stop offset="100%" stop-color="#d5ebf2" stop-opacity="0.03"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+        <!-- 중간 좌측 나뭇잎/풀 장식 -->
+        <div class="bg-mid-left">
+            <svg viewBox="0 0 200 250" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.5;">
+                <path d="M0 0 Q20 40 10 80 Q30 60 50 90 Q40 120 20 140 Q35 130 60 150 Q30 180 0 200 L0 0Z" fill="url(#midL1)"/>
+                <ellipse cx="0" cy="100" rx="80" ry="60" fill="url(#midL2)"/>
+                <ellipse cx="10" cy="160" rx="60" ry="40" fill="url(#midL3)"/>
+                <defs>
+                    <linearGradient id="midL1" x1="0" y1="0" x2="60" y2="200">
+                        <stop offset="0%" stop-color="#8cc5a8" stop-opacity="0.4"/>
+                        <stop offset="100%" stop-color="#b5dcc5" stop-opacity="0.1"/>
+                    </linearGradient>
+                    <radialGradient id="midL2" cx="0" cy="0.5" r="1">
+                        <stop offset="0%" stop-color="#a3d4b7" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#c8e6d2" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="midL3" cx="0.1" cy="0.5" r="1">
+                        <stop offset="0%" stop-color="#90c8ae" stop-opacity="0.2"/>
+                        <stop offset="100%" stop-color="#c5e3d0" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+            </svg>
+        </div>
+        <!-- 중간 우측 장식 -->
+        <div class="bg-mid-right">
+            <svg viewBox="0 0 180 220" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.45;">
+                <path d="M180 20 Q160 50 170 90 Q150 70 130 100 Q145 130 165 150 Q140 140 120 160 Q150 190 180 210 L180 20Z" fill="url(#midR1)"/>
+                <ellipse cx="180" cy="110" rx="70" ry="55" fill="url(#midR2)"/>
+                <defs>
+                    <linearGradient id="midR1" x1="180" y1="20" x2="120" y2="210">
+                        <stop offset="0%" stop-color="#7fbfdb" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#b5d8e8" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <radialGradient id="midR2" cx="1" cy="0.5" r="1">
+                        <stop offset="0%" stop-color="#95cada" stop-opacity="0.2"/>
+                        <stop offset="100%" stop-color="#c5e2ed" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+            </svg>
+        </div>
+        <!-- 왼쪽 하단 자연 장식 -->
+        <div class="bg-bottom-left">
+            <svg viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.55;">
+                <ellipse cx="50" cy="300" rx="180" ry="100" fill="url(#blCloud1)"/>
+                <path d="M0 120 Q40 160 30 200 Q60 170 90 190 Q120 150 160 180 Q190 140 230 170 Q200 220 160 250 Q100 280 0 300 L0 120Z" fill="url(#blMtn1)"/>
+                <path d="M0 180 Q50 200 40 240 Q80 210 120 230 Q100 260 60 280 L0 300 L0 180Z" fill="url(#blMtn2)"/>
+                <ellipse cx="200" cy="280" rx="120" ry="40" fill="url(#blGrass)"/>
+                <defs>
+                    <radialGradient id="blCloud1" cx="0.2" cy="1" r="1">
+                        <stop offset="0%" stop-color="#b8dce8" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#d4eef5" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="blMtn1" x1="0" y1="120" x2="100" y2="300">
+                        <stop offset="0%" stop-color="#8cc5a8" stop-opacity="0.35"/>
+                        <stop offset="100%" stop-color="#bce0cb" stop-opacity="0.1"/>
+                    </linearGradient>
+                    <linearGradient id="blMtn2" x1="0" y1="180" x2="60" y2="300">
+                        <stop offset="0%" stop-color="#a3d4b7" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#d0ebd8" stop-opacity="0.05"/>
+                    </linearGradient>
+                    <radialGradient id="blGrass" cx="0.5" cy="0.8" r="0.8">
+                        <stop offset="0%" stop-color="#a8d5b8" stop-opacity="0.2"/>
+                        <stop offset="100%" stop-color="#c8e6d2" stop-opacity="0"/>
+                    </radialGradient>
+                </defs>
+            </svg>
+        </div>
+        <!-- 오른쪽 하단 자연 장식 -->
+        <div class="bg-bottom-right">
+            <svg viewBox="0 0 380 280" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;opacity:0.5;">
+                <ellipse cx="330" cy="280" rx="160" ry="90" fill="url(#brCloud1)"/>
+                <path d="M380 100 Q340 140 350 180 Q310 150 270 170 Q240 140 200 160 Q230 200 270 230 Q320 260 380 280 L380 100Z" fill="url(#brMtn1)"/>
+                <path d="M380 170 Q340 190 350 230 Q310 210 270 230 Q300 260 340 270 L380 280 L380 170Z" fill="url(#brMtn2)"/>
+                <defs>
+                    <radialGradient id="brCloud1" cx="0.85" cy="1" r="1">
+                        <stop offset="0%" stop-color="#a8d1e0" stop-opacity="0.22"/>
+                        <stop offset="100%" stop-color="#c8e4ef" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="brMtn1" x1="380" y1="100" x2="280" y2="280">
+                        <stop offset="0%" stop-color="#7fbfdb" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#b5d8e8" stop-opacity="0.08"/>
+                    </linearGradient>
+                    <linearGradient id="brMtn2" x1="380" y1="170" x2="300" y2="280">
+                        <stop offset="0%" stop-color="#95cada" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#c5e2ed" stop-opacity="0.05"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+    </div>
+    <!-- 학교 일러스트 -->
+    <div class="school-illustration">
+        <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;">
+            <!-- 나무 (왼쪽) -->
+            <rect x="15" y="90" width="8" height="30" rx="2" fill="#8B6F47"/>
+            <ellipse cx="19" cy="78" rx="16" ry="22" fill="#5DAE6B"/>
+            <ellipse cx="14" cy="82" rx="12" ry="16" fill="#4A9B58"/>
+            <!-- 나무 (오른쪽) -->
+            <rect x="135" y="95" width="7" height="25" rx="2" fill="#8B6F47"/>
+            <ellipse cx="138" cy="84" rx="14" ry="18" fill="#5DAE6B"/>
+            <ellipse cx="142" cy="88" rx="10" ry="14" fill="#4A9B58"/>
+            <!-- 학교 건물 본체 -->
+            <rect x="35" y="65" width="90" height="55" rx="3" fill="#F5E6C8"/>
+            <rect x="35" y="65" width="90" height="55" rx="3" stroke="#D4C4A0" stroke-width="1"/>
+            <!-- 지붕 -->
+            <path d="M30 68 L80 30 L130 68Z" fill="#E8524A"/>
+            <path d="M30 68 L80 30 L130 68Z" stroke="#D4443C" stroke-width="1"/>
+            <!-- 지붕 위 장식 -->
+            <rect x="75" y="22" width="10" height="12" rx="1" fill="#FFD93D"/>
+            <polygon points="80,14 74,22 86,22" fill="#FFD93D"/>
+            <!-- 시계 -->
+            <circle cx="80" cy="50" r="10" fill="white" stroke="#D4C4A0" stroke-width="1.5"/>
+            <line x1="80" y1="50" x2="80" y2="43" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="80" y1="50" x2="85" y2="52" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            <!-- 창문들 -->
+            <rect x="42" y="75" width="14" height="14" rx="2" fill="#87CEEB" stroke="#D4C4A0" stroke-width="1"/>
+            <line x1="49" y1="75" x2="49" y2="89" stroke="#D4C4A0" stroke-width="0.8"/>
+            <line x1="42" y1="82" x2="56" y2="82" stroke="#D4C4A0" stroke-width="0.8"/>
+            <rect x="62" y="75" width="14" height="14" rx="2" fill="#87CEEB" stroke="#D4C4A0" stroke-width="1"/>
+            <line x1="69" y1="75" x2="69" y2="89" stroke="#D4C4A0" stroke-width="0.8"/>
+            <line x1="62" y1="82" x2="76" y2="82" stroke="#D4C4A0" stroke-width="0.8"/>
+            <rect x="104" y="75" width="14" height="14" rx="2" fill="#87CEEB" stroke="#D4C4A0" stroke-width="1"/>
+            <line x1="111" y1="75" x2="111" y2="89" stroke="#D4C4A0" stroke-width="0.8"/>
+            <line x1="104" y1="82" x2="118" y2="82" stroke="#D4C4A0" stroke-width="0.8"/>
+            <!-- 문 -->
+            <rect x="84" y="96" width="16" height="24" rx="8 8 0 0" fill="#6B4226"/>
+            <circle cx="96" cy="110" r="1.5" fill="#FFD93D"/>
+            <!-- 잔디 -->
+            <ellipse cx="80" cy="122" rx="70" ry="6" fill="#7BC67E"/>
+            <ellipse cx="80" cy="124" rx="75" ry="5" fill="#6AB86D"/>
+            <!-- 구름 -->
+            <ellipse cx="30" cy="25" rx="18" ry="8" fill="white" opacity="0.8"/>
+            <ellipse cx="140" cy="20" rx="14" ry="6" fill="white" opacity="0.7"/>
+        </svg>
+    </div>
+    <header class="relative" style="z-index:2;">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <h1 class="text-center text-3xl font-bold text-gray-800">경상남도교육청 학교업무 도움자료</h1>
+            <p class="text-center text-gray-500 mt-2">학교 업무에 필요한 자료를 쉽게 찾아보세요!</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 전체 통합 검색 (모든 카테고리 + 한글 초성 검색) -->
+        <div class="mb-8">
+            <div class="relative max-w-2xl mx-auto">
+                <input
+                    type="text"
+                    id="global-search"
+                    placeholder="전체 자료에서 검색 (초성도 가능 · 예: ㅇㅊㅇ)"
+                    class="w-full px-5 py-3 pl-12 pr-12 rounded-full border border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/90"
+                    oninput="globalSearch()"
+                    autocomplete="off"
+                >
+                <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <button
+                    id="global-search-clear"
+                    type="button"
+                    onclick="clearGlobalSearch()"
+                    class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-150"
+                    aria-label="검색어 지우기"
+                >
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 통합 검색 결과 (검색 시에만 표시) -->
+        <div id="global-results" class="hidden relative z-10"></div>
+
+        <!-- 카테고리 탐색 뷰 (검색 중에는 숨김) -->
+        <div id="browse-view" class="relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 0ms;">
+                <button
+                    onclick="toggleSection('kindergarten')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-child text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">유치원</h3>
+                            <p class="text-sm text-gray-600">유치원 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="kindergarten-arrow"></i>
+                </button>
+                
+                <div id="kindergarten-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="kindergarten-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                        oninput="searchSection('kindergarten')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="kindergarten-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 80ms;">
+                <button
+                    onclick="toggleSection('elementary')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-book text-green-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">초등학교</h3>
+                            <p class="text-sm text-gray-600">초등학교 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="elementary-arrow"></i>
+                </button>
+                
+                <div id="elementary-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="elementary-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors duration-200"
+                                        oninput="searchSection('elementary')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="elementary-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 160ms;">
+                <button
+                    onclick="toggleSection('secondary')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-solid fa-chalkboard text-purple-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">중고등학교</h3>
+                            <p class="text-sm text-gray-600">중고등학교 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="secondary-arrow"></i>
+                </button>
+                
+                <div id="secondary-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="secondary-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors duration-200"
+                                        oninput="searchSection('secondary')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="secondary-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 240ms;">
+                <button
+                    onclick="toggleSection('special')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-heart text-orange-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">특수학교(급)</h3>
+                            <p class="text-sm text-gray-600">특수학교 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="special-arrow"></i>
+                </button>
+                
+                <div id="special-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="special-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors duration-200"
+                                        oninput="searchSection('special')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="special-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 320ms;">
+                <button
+                    onclick="toggleSection('admin')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-solid fa-tag text-amber-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900"> 교무행정</h3>
+                            <p class="text-sm text-gray-600">교무행정 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="admin-arrow"></i>
+                </button>
+                
+                <div id="admin-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="admin-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-colors duration-200"
+                                        oninput="searchSection('admin')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="admin-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 400ms;">
+                <button
+                    onclick="toggleSection('staff')"
+                    class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-t-lg"
+                >
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mr-4">
+                            <i class="fas fa-solid fa-file text-red-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">일반행정</h3>
+                            <p class="text-sm text-gray-600">일반행정 관련 업무자료</p>
+                        </div>
+                    </div>
+                    <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="staff-arrow"></i>
+                </button>
+                
+                <div id="staff-content" class="slide-content rounded-b-lg">
+                    <div>
+                        <div class="border-t border-gray-100">
+                            <div class="p-4 bg-gray-50">
+                                <div class="relative">
+                                    <input
+                                        type="text"
+                                        id="staff-search"
+                                        placeholder="원하는 업무를 검색해 보세요."
+                                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors duration-200"
+                                        oninput="searchSection('staff')"
+                                    >
+                                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                                </div>
+                            </div>
+                            <div id="staff-sections" class="p-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+</div>
+
+        <!-- 경남 특화비서 (경남GPT 비서 바로가기, 가로로 긴 카드) -->
+        <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 card-entrance" style="animation-delay: 640ms;">
+            <button
+                onclick="toggleSection('gyeongnam')"
+                class="w-full p-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200 rounded-lg"
+            >
+                <div class="flex items-center">
+                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mr-4">
+                        <i class="fas fa-star text-teal-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">경남 특화비서</h3>
+                        <p class="text-sm text-gray-600">학생부·문서 작성·행정 지원 AI 비서</p>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="gyeongnam-arrow"></i>
+            </button>
+            <div id="gyeongnam-content" class="slide-content rounded-b-lg">
+                <div>
+                    <div class="border-t border-gray-100">
+                        <div id="gyeongnam-sections" class="p-4 sm:p-5"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="mt-3 mb-24 px-1 text-base font-medium text-red-600">※ AI서비스는 2026년 '(가칭)경남GPT' 시범사업에 선정된 학교(기관)에 한해 제공되니 양해 바랍니다.</p>
+        </div><!-- /browse-view -->
+    </main>
+
+    <footer class="bg-white/40 backdrop-blur-md border-t border-gray-200/20 fixed bottom-0 left-0 w-full" style="z-index: 10;">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <p class="text-center text-gray-600 text-sm">Copyright © 경상남도교육청. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+const kindergartenData = {
+        "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            {
+                id: "k-0-1",
+                title: "0. 일러두기 및 목록",
+                url: "https://works.do/FoT1hwj"
+            }
+        ]
+    },
+    "1. 학사": {
+        icon: "fas fa-school",
+        color: "blue",
+        items: [
+            {
+                id: "k-1-1",
+                title: "1-1. 유치원 규칙",
+                url: "https://works.do/xBYs5ou"
+            },
+            {
+                id: "k-1-2",
+                title: "1-2. 출결 및 전출입",
+                url: "https://works.do/xuviNGT"
+            },
+            {
+                id: "k-1-3",
+                title: "1-3. 유치원 생활기록부",
+                url: "https://works.do/GuodUtw"
+            }
+        ]
+    },
+    "2. 교육과정": {
+        icon: "fas fa-chalkboard-teacher",
+        color: "green",
+        items: [
+            {
+                id: "k-2-1",
+                title: "2-01. 교육과정 편성ㆍ운영",
+                url: "https://works.do/xyJlPO8"
+            },
+            {
+                id: "k-2-2",
+                title: "2-02. 교육과정 평가",
+                url: "https://works.do/FLHhlQh"
+            },
+            {
+                id: "k-2-3",
+                title: "2-03. 유치원 평가",
+                url: "https://works.do/Fo4HpBi"
+            },
+            {
+                id: "k-2-4",
+                title: "2-04. 자율장학",
+                url: "https://works.do/FKZOJEQ"
+            },
+            {
+                id: "k-2-5",
+                title: "2-05. 디지털교육",
+                url: "https://works.do/FvKF3om"
+            },
+            {
+                id: "k-2-6",
+                title: "2-06. 다문화교육",
+                url: "https://works.do/51faGCQ"
+            },
+            {
+                id: "k-2-7",
+                title: "2-07. 인성교육",
+                url: "https://works.do/IMVnw5P"
+            },
+            {
+                id: "k-2-8",
+                title: "2-08. 유ㆍ초 이음교육",
+                url: "https://works.do/xM0EU7m"
+            },
+            {
+                id: "k-2-9",
+                title: "2-09. 생태전환교육",
+                url: "https://works.do/5YiaZfT"
+            },
+            {
+                id: "k-2-10",
+                title: "2-10. 학부모 참여 교육",
+                url: "https://works.do/FSV5aWq"
+            }
+        ]
+    },
+    "3. 방과후과정": {
+        icon: "fas fa-clock",
+        color: "purple",
+        items: [
+            {
+                id: "k-3-1",
+                title: "3-1. 방과후과정",
+                url: "https://works.do/FLHhl6Y"
+            },
+            {
+                id: "k-3-2",
+                title: "3-2. 특성화활동",
+                url: "https://works.do/Guodm9Z"
+            }
+        ]
+    },
+    "4. 안전ㆍ보건": {
+        icon: "fas fa-shield-alt",
+        color: "red",
+        items: [
+            {
+                id: "k-4-1",
+                title: "4-1. 안전교육",
+                url: "https://works.do/FR1cPVY"
+            },
+            {
+                id: "k-4-2",
+                title: "4-2. 현장체험학습",
+                url: "https://works.do/xsj8gAZ"
+            },
+            {
+                id: "k-4-3",
+                title: "4-3. 교육활동보호",
+                url: "https://works.do/GLBSnvY"
+            },
+            {
+                id: "k-4-4",
+                title: "4-4. 아동학대 조기 발견 및 관리 대응",
+                url: "https://works.do/IGuKw4G"
+            },
+            {
+                id: "k-4-5",
+                title: "4-5. 학생건강ㆍ급식관리",
+                url: "https://works.do/FjlcyMv"
+            },
+            {
+                id: "k-4-6",
+                title: "4-6. 감염병 예방 및 관리",
+                url: "https://works.do/5cw2iKX"
+            },
+            {
+                id: "k-4-7",
+                title: "4-7. 성교육 및 성폭력예방교육",
+                url: "https://works.do/FLHhlJa"
+            },
+            {
+                id: "k-4-8",
+                title: "4-8. 학교 환경 관리",
+                url: "https://works.do/FpmZ4pA"
+            }
+        ]
+    },
+    "5. 정보": {
+        icon: "fas fa-info-circle",
+        color: "indigo",
+        items: [
+            {
+                id: "k-5-1",
+                title: "5-1. 유치원 정보공시",
+                url: "https://works.do/5rdZALe"
+            },
+            {
+                id: "k-5-2",
+                title: "5-2. 정보화기기 관리",
+                url: "https://works.do/FGhFMpk"
+            },
+            {
+                id: "k-5-3",
+                title: "5-3. 유치원 정보보안",
+                url: "https://works.do/GPvXN4o"
+            },
+            {
+                id: "k-5-4",
+                title: "5-4. 개인정보보호",
+                url: "https://works.do/5yXBvkC"
+            },
+            {
+                id: "k-5-5",
+                title: "5-5. 나이스운영(유치원)",
+                url: "https://works.do/5m3BSeP"
+            }
+        ]
+    }
+};
+
+const elementaryData = {
+    "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            {
+                id: "e-0-1",
+                title: "0. 일러두기 및 목록",
+                url: "https://works.do/FLorX4s"
+            }
+        ]
+    },
+    "1. 교무": {
+        icon: "fas fa-briefcase",
+        color: "sky",
+        items: [
+            { id: "e-1-1", title: "1-01. 학교규칙", url: "https://works.do/xqQ5HfV" },
+            { id: "e-1-2", title: "1-02. 학교생활기록부", url: "https://works.do/5xKLYlB" },
+            { id: "e-1-3", title: "1-03. 보결수업규정", url: "https://works.do/5U9ro1Q" },
+            { id: "e-1-4", title: "1-04. 학생출결상황관리", url: "https://works.do/5fJPLJa" },
+            { id: "e-1-5", title: "1-05. 전출입학적관리", url: "https://works.do/Gg2PT2Z" },
+            { id: "e-1-6", title: "1-06. 귀국학생 재취학 및 편입학 관리", url: "https://works.do/F67bk7n" },
+            { id: "e-1-7", title: "1-07. 졸업사정", url: "https://works.do/G9htQh0" },
+            { id: "e-1-8", title: "1-08. 교외체험학습", url: "https://works.do/GdViCV4" },
+            { id: "e-1-9", title: "1-09. 교육활동보호", url: "https://works.do/Fq3iN3a" },
+            { id: "e-1-10", title: "1-10. 학부모참여교육", url: "https://works.do/5ZRjdRg" },
+            { id: "e-1-11", title: "1-11. 미래학교 공간재구조화", url: "https://works.do/GdViC6N" }
+        ]
+    },
+    "2. 연구": {
+        icon: "fas fa-flask",
+        color: "emerald",
+        items: [
+            { id: "e-2-1", title: "2-01. 교육과정 편성ㆍ운영", url: "https://works.do/FI8ohpy" },
+            { id: "e-2-2", title: "2-02. 학생평가", url: "https://works.do/53yULX0" },
+            { id: "e-2-3", title: "2-03. 학교평가", url: "https://works.do/5IgTylt" },
+            { id: "e-2-4", title: "2-04. 외국어교육", url: "https://works.do/FT8qROo" },
+            { id: "e-2-5", title: "2-05. 자율장학", url: "https://works.do/GDXNxb0" },
+            { id: "e-2-6", title: "2-06. 교원 연수", url: "https://works.do/xT1bQSp" },
+            { id: "e-2-7", title: "2-07. 교원역량개발지원제도", url: "https://works.do/GTWerSY" },
+            { id: "e-2-8", title: "2-08. 기초학력책임제", url: "https://works.do/GO2zbQy" },
+            { id: "e-2-9", title: "2-09. 교과서", url: "https://works.do/5U9roGG" },
+            { id: "e-2-10", title: "2-10. 학교도서관ㆍ독서교육", url: "https://works.do/Gj3ZDGI" },
+            { id: "e-2-11", title: "2-11. 독도교육(나라사랑교육, 계기교육)", url: "https://works.do/FXHKFra" },
+            { id: "e-2-12", title: "2-12. 다문화교육", url: "https://works.do/xqQ5HoY" }
+        ]
+    },
+    "3. 돌봄·방과후학교·예술": {
+        icon: "fas fa-puzzle-piece",
+        color: "teal",
+        items: [
+            { id: "e-3-1", title: "3-01. 돌봄·방과후학교", url: "https://works.do/5SFyRaX" },
+            { id: "e-3-2", title: "3-02. 예술교육", url: "https://works.do/5U9roGu" }
+        ]
+    },
+    "4. 정보": {
+        icon: "fas fa-laptop-code",
+        color: "amber",
+        items: [
+            { id: "e-4-1", title: "4-01. 정보화 기기 관리", url: "https://works.do/GN8vdvn" },
+            { id: "e-4-2", title: "4-02. 정보화 교육", url: "https://works.do/51faGap" },
+            { id: "e-4-3", title: "4-03. 정보공시", url: "https://works.do/G6Ff8fP" },
+            { id: "e-4-4", title: "4-04. 학교정보보안", url: "https://works.do/GFTYHYh" },
+            { id: "e-4-5", title: "4-05. 개인정보보호", url: "https://works.do/x9Z5F5X" },
+            { id: "e-4-6", title: "4-06. 학교누리집 관리 및 운영", url: "https://works.do/5Vol2lG" },
+            { id: "e-4-7", title: "4-07. 나이스 운영", url: "https://works.do/xdifvpt" },
+            { id: "e-4-8", title: "4-08. AI디지털교과서", url: "https://works.do/5dZPqu6" },
+            { id: "e-4-9", title: "4-09. 학습지원 소프트웨어 선정", url: "https://works.do/FskqERF" }
+        ]
+    },
+    "5. 과학ㆍ수학ㆍ영재ㆍ환경": {
+        icon: "fas fa-atom",
+        color: "pink",
+        items: [
+            { id: "e-5-1", title: "5-01. 과학실 운영", url: "https://works.do/5lMxl7a" },
+            { id: "e-5-2", title: "5-02. 영재교육", url: "https://works.do/xZ3GvVA" },
+            { id: "e-5-3", title: "5-03. 과학동아리", url: "https://works.do/FViBw7d" },
+            { id: "e-5-4", title: "5-04. 과학행사", url: "https://works.do/Gj3ZD6t" },
+            { id: "e-5-5", title: "5-05. 생태전환교육", url: "https://works.do/FOXMr9k" },
+            { id: "e-5-6", title: "5-06. 수학교육", url: "https://works.do/FI8ohNT" }
+        ]
+    },
+    "6. 인성": {
+        icon: "fas fa-solid fa-heart",
+        color: "fuchsia",
+        items: [
+            { id: "e-6-1", title: "6-01. 인성교육", url: "https://works.do/5EkaGnh" },
+            { id: "e-6-2", title: "6-02. 회복적생활교육", url: "https://works.do/FSV5aSQ" },
+            { id: "e-6-3", title: "6-03. 학교폭력예방 및 근절", url: "https://works.do/IMVnw4P" },
+            { id: "e-6-4", title: "6-04. 아동학대예방", url: "https://works.do/F7Syp5j" },
+            { id: "e-6-5", title: "6-05. 학생자치ㆍ봉사활동", url: "https://works.do/5DqjNDt" },
+            { id: "e-6-6", title: "6-06. 학생맞춤통합지원", url: "https://works.do/F1FeU6O" },
+            { id: "e-6-7", title: "6-07. 진로, 상담교육", url: "https://works.do/G8g7vhX" },
+            { id: "e-6-8", title: "6-08. 성교육 및 양성평등 교육", url: "https://works.do/GFTYHCq" },
+            { id: "e-6-9", title: "6-09. 성희롱·성폭력 예방 및 근절", url: "https://works.do/xIZgqFE" }
+        ]
+    },
+    "7. 체육ㆍ안전": {
+        icon: "fas fa-heart-pulse",
+        color: "rose",
+        items: [
+            { id: "e-7-1", title: "7-01. 중점학교스포츠클럽(학교운동부) 운영", url: "https://works.do/F3DOvEE" },
+            { id: "e-7-2", title: "7-02. 운동하는 학교", url: "https://works.do/xYk93NG" },
+            { id: "e-7-3", title: "7-03. 학교스포츠클럽", url: "https://works.do/F5XC4sO" },
+            { id: "e-7-4", title: "7-04. 학생건강체력평가(PAPS)", url: "https://works.do/FcTuZ68" },
+            { id: "e-7-5", title: "7-05. 체육시설 및 체육 기자재 관리", url: "https://works.do/xjXJuYB" },
+            { id: "e-7-6", title: "7-06. 보건업무", url: "https://works.do/529TiaJ" },
+            { id: "e-7-7", title: "7-07. 안전교육", url: "https://works.do/Gt81iYD" },
+            { id: "e-7-8", title: "7-08. 현장체험학습", url: "https://works.do/xJLqDu2" }
+        ]
+    },
+    "8. (초등)교감업무도움자료": {
+        icon: "fas fa-user-tie",
+        color: "slate",
+        items: [
+            { id: "e-8-1", title: "8. (초등)교감업무도움자료", url: "https://works.do/GPvXNy9" }
+        ]
+    },
+    "9. 저연차(신규, 저경력) 업무 도움자료": {
+        icon: "fas fa-seedling",
+        color: "lime",
+        items: [
+            { id: "e-9-1", title: "9-01. 2026 신규교사 첫 출근 도움자료", url: "https://works.do/Fevp7wv" },
+            { id: "e-9-2", title: "9-02. 2026 저경력교사 첫 업무 도움자료", url: "https://works.do/FskqE04" }
+        ]
+    }
+};
+
+const secondaryData = {
+    "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            { id: "s-0-1", title: "0. 일러두기 및 목록", url: "https://works.do/F0EaBxh" }
+        ]
+    },
+    "1. 교무": {
+        icon: "fas fa-user-tie",
+        color: "amber",
+        items: [
+            { id: "s-1-1", title: "1-01. 학교규칙", url: "https://works.do/GoOMiWy" },
+            { id: "s-1-2", title: "1-02. 학교생활기록부(학생부, 생기부)", url: "https://works.do/5m3HhP6" },
+            { id: "s-1-3", title: "1-03. 출결", url: "https://works.do/5vO53rk" },
+            { id: "s-1-4", title: "1-04. 교외체험학습, 위탁교육", url: "https://works.do/FjleCpV" },
+            { id: "s-1-5", title: "1-05. 전입학, 재취학, 편입학 학적 (귀국포함)", url: "https://works.do/GuoJDtE" },
+            { id: "s-1-6", title: "1-06. 입학식", url: "https://works.do/5wh9rx7" },
+            { id: "s-1-7", title: "1-07. 방학 계획", url: "https://works.do/xT12ygq" },
+            { id: "s-1-8", title: "1-08. 졸업 및 진급 사정", url: "https://works.do/GCUzJnc" },
+            { id: "s-1-9", title: "1-09. 졸업식", url: "https://works.do/GqJmfGK" },
+            { id: "s-1-10", title: "1-10. 교육활동보호", url: "https://works.do/5YiOoDu" },
+            { id: "s-1-11", title: "1-11. 미래학교 공간재구조화", url: "https://works.do/xYkyNBI" }
+        ]
+    },
+    "2. 교육과정·평가": {
+        icon: "fas fa-book-open-reader",
+        color: "cyan",
+        items: [
+            { id: "s-2-1", title: "2-01. 교육과정 편성ㆍ운영", url: "https://works.do/GzbgOx4" },
+            { id: "s-2-2", title: "2-02. 일과 업무", url: "https://works.do/GeFdABc" },
+            { id: "s-2-3", title: "2-03. 창의적 체험활동", url: "https://works.do/GaD26UW" },
+            { id: "s-2-4", title: "2-04. 자유학기제 / 자율시간", url: "https://works.do/5B6k4Tu" },
+            { id: "s-2-5", title: "2-05. 평가 계획", url: "https://works.do/5xKLYdY" },
+            { id: "s-2-6", title: "2-06. 학업성적관리위원회", url: "https://works.do/FUrzpnD" },
+            { id: "s-2-7", title: "2-07. 교과용도서선정위원회", url: "https://works.do/53yULE2" },
+            { id: "s-2-8", title: "2-08. 독도, 통일 외 계기교육", url: "https://works.do/5jCm6kY" },
+            { id: "s-2-9", title: "2-09. 다문화교육", url: "https://works.do/xW1BZEI" },
+            { id: "s-2-10", title: "2-10. 학부모 참여교육", url: "https://works.do/IGuKwpe" },
+            { id: "s-2-11", title: "2-11. 기초학력", url: "https://works.do/FuQ6Uwq" },
+            { id: "s-2-12", title: "2-12. 고교학점제", url: "https://works.do/5uzigw3" }
+        ]
+    },
+    "3. 연구": {
+        icon: "fas fa-seedling",
+        color: "lime",
+        items: [
+            { id: "s-3-1", title: "3-01. 자율 장학", url: "https://works.do/5yXBvQ9" },
+            { id: "s-3-2", title: "3-02. 전문적 학습공동체", url: "https://works.do/xoRYBSx" },
+            { id: "s-3-3", title: "3-03. 학교평가", url: "https://works.do/FLHhlwy" },
+            { id: "s-3-4", title: "3-04. 교원연수", url: "https://works.do/FgwSq22" },
+            { id: "s-3-5", title: "3-05. 교원역량개발지원제도", url: "https://works.do/x1D02NL" },
+            { id: "s-3-6", title: "3-06. 학교도서관ㆍ독서교육", url: "https://works.do/5yXBves" },
+            { id: "s-3-7", title: "3-07. 학교 축제", url: "https://works.do/xGKmSDj" },
+            { id: "s-3-8", title: "3-08. 돌봄·방과후학교", url: "https://works.do/IIm1OIX" },
+            { id: "s-3-9", title: "3-09. 동아리", url: "https://works.do/FWrfVD1" },
+            { id: "s-3-10", title: "3-10. 문화예술교육", url: "https://works.do/5xKLYUM" }
+        ]
+    },
+    "4. 정보": {
+        icon: "fas fa-network-wired",
+        color: "violet",
+        items: [
+            { id: "s-4-1", title: "4-01. 정보화 기기 관리", url: "https://works.do/xzFnt9I" },
+            { id: "s-4-2", title: "4-02. 정보화 교육", url: "https://works.do/F7SypR2" },
+            { id: "s-4-3", title: "4-03. 정보공시", url: "https://works.do/xsj8g5u" },
+            { id: "s-4-4", title: "4-04. 학교정보보안", url: "https://works.do/GVSNi4h" },
+            { id: "s-4-5", title: "4-05. 개인정보보호", url: "https://works.do/GFTYHVh" },
+            { id: "s-4-6", title: "4-06. 학교누리집 관리 및 운영", url: "https://works.do/GdViCop" },
+            { id: "s-4-7", title: "4-07. 나이스 운영", url: "https://works.do/5RQ8aYw" },
+            { id: "s-4-8", title: "4-08. 학습지원 소프트웨어 선정", url: "https://works.do/5rdZAFq" }
+        ]
+    },
+    "5. 과학ㆍ수학ㆍ영재ㆍ환경": {
+        icon: "fas fa-microscope",
+        color: "teal",
+        items: [
+            { id: "s-5-1", title: "5-01. 과학실 운영", url: "https://works.do/F3DOvQD" },
+            { id: "s-5-2", title: "5-02. 과학교재교구관리", url: "https://works.do/x9Z5FjV" },
+            { id: "s-5-3", title: "5-03. 과학행사", url: "https://works.do/GXkqi77" },
+            { id: "s-5-4", title: "5-04. 과학동아리", url: "https://works.do/GqJNGdw" },
+            { id: "s-5-5", title: "5-05. 영재학급운영", url: "https://works.do/FBkJ3zL" },
+            { id: "s-5-6", title: "5-06. 영재교육대상자 선발", url: "https://works.do/F2FiBgy" },
+            { id: "s-5-7", title: "5-07. 창의성교육", url: "https://works.do/5lMxlR9" },
+            { id: "s-5-8", title: "5-08. 생태전환교육", url: "https://works.do/FViBw4J" },
+            { id: "s-5-9", title: "5-09. 수학교육", url: "https://works.do/FUrzp1D" }                
+        ]
+    },
+    "6. 인성": {
+        icon: "fas fa-hands-helping",
+        color: "pink",
+        items: [
+            { id: "s-6-1", title: "6-01. 인성교육", url: "https://works.do/IFSIbYd" },
+            { id: "s-6-2", title: "6-02. 회복적생활교육", url: "https://works.do/GULth9d" },
+            { id: "s-6-3", title: "6-03. 학교폭력예방 및 근절", url: "https://works.do/xHkDfU9" },
+            { id: "s-6-4", title: "6-04. 학생맞춤형통합지원", url: "https://works.do/FiiOGg4" },
+            { id: "s-6-5", title: "6-05. 학생 자치활동", url: "https://works.do/56ragEZ" },
+            { id: "s-6-6", title: "6-06. 학생 봉사활동", url: "https://works.do/G0YlqtU" },
+            { id: "s-6-7", title: "6-07. 진로ㆍ상담교육", url: "https://works.do/5EkaG2f" },
+            { id: "s-6-8", title: "6-08. 성교육및양성평등교육", url: "https://works.do/FR1cP5u" },
+            { id: "s-6-9", title: "6-09. 성희롱성폭력예방 및 근절", url: "https://works.do/5eewk5r" },
+            { id: "s-6-10", title: "6-10. 아동학대예방", url: "https://works.do/GoO29Rc" }
+        ]
+    },
+    "7. 체육ㆍ안전": {
+        icon: "fas fa-dumbbell",
+        color: "orange",
+        items: [
+            { id: "s-7-1", title: "7-01. 교내체육대회", url: "https://works.do/5tPeO2R" },
+            { id: "s-7-2", title: "7-02. 체육기자재 관리", url: "https://works.do/5uzigr7" },
+            { id: "s-7-3", title: "7-03. 학생건강체력평가(PAPS)", url: "https://works.do/xuvi0qQ" },
+            { id: "s-7-4", title: "7-04. 운동하는 학교", url: "https://works.do/xxfRGH5" },
+            { id: "s-7-5", title: "7-05. 학교스포츠클럽", url: "https://works.do/GuodmHZ" },
+            { id: "s-7-6", title: "7-06. 학생 건강 관리", url: "https://works.do/IMVnwI0" },
+            { id: "s-7-7", title: "7-07. 감염병 예방 및 관리", url: "https://works.do/FEZN2Ft" },
+            { id: "s-7-8", title: "7-08. 학교 환경 관리", url: "https://works.do/GdViCZS" },
+            { id: "s-7-9", title: "7-09. 학교흡연예방교육", url: "https://works.do/GryNP3p" },
+            { id: "s-7-10", title: "7-10. 교복 구매", url: "https://works.do/5Vol27d" },
+            { id: "s-7-11", title: "7-11. 안전 교육", url: "https://works.do/xOPItoW" },
+            { id: "s-7-12", title: "7-12. 현장 체험 학습", url: "https://works.do/GvzdUIR" }
+        ]
+    },
+    "8. (중등)교감업무도움자료": {
+        icon: "fas fa-user-tie",
+        color: "slate",
+        items: [
+            { id: "s-8-1", title: "8. (중등)교감업무도움자료", url: "https://works.do/5jCm6cs" }
+        ]
+    }
+};
+
+const specialData = {
+    "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            {
+                id: "sp-0-1",
+                title: "0. 일러두기 및 목록",
+                url: "https://works.do/55DK7sx"
+            }
+        ]
+    },
+    "1. 특수교육 교육과정 편성ㆍ운영": {
+        icon: "fas fa-sitemap",
+        color: "violet",
+        items: [
+            { id: "sp-1-1", title: "1-01. 특수학교 교육과정 편성ㆍ운영", url: "https://works.do/5g7dQAe" },
+            { id: "sp-1-2", title: "1-02. 특수학급 및 통합학급 교육과정 편성ㆍ운영", url: "https://works.do/5nLX52k" },
+            { id: "sp-1-3", title: "1-03. 장애학생 학업성적 관리 및 평가 조정", url: "https://works.do/x7cBpKP" },
+            { id: "sp-1-4", title: "1-04. 일상생활교육과정 운영", url: "https://works.do/xYk935M" },
+            { id: "sp-1-5", title: "1-05. 고교학점제", url: "https://works.do/5F3hiWz" },
+            { id: "sp-1-6", title: "1-06. 자유학기제", url: "https://works.do/xPBvHqZ" },
+            { id: "sp-1-7", title: "1-07. 진로 및 직업교육 운영", url: "https://works.do/FOXMrOu" },
+            { id: "sp-1-8", title: "1-08. 특수학교 전공과 운영", url: "https://works.do/FGhFMcm" },
+            { id: "sp-1-9", title: "1-09. 특수학교 및 특수학급 신증설", url: "https://works.do/5PJs8PS" }
+        ]
+    },
+    "2. 개별화 교육계획 작성 활용": {
+        icon: "fas fa-file-signature",
+        color: "pink",
+        items: [
+            { id: "sp-2-1", title: "2-01. 개별화교육지원팀 구성 및 운영", url: "https://works.do/xQZ8VDd" },
+            { id: "sp-2-2", title: "2-02. 개별화교육계획 수립 및 평가", url: "https://works.do/5hUJN6b" }
+        ]
+    },
+    "3. 특수교육대상자 학적 관리": {
+        icon: "fas fa-address-book",
+        color: "green",
+        items: [
+            { id: "sp-3-1", title: "3-01. 특수교육대상자 선정ㆍ배치(전학, 입학)", url: "https://works.do/5srmge4" },
+            { id: "sp-3-2", title: "3-02. 학교생활기록부 작성 및 관리", url: "https://works.do/FfiAcIO" },
+            { id: "sp-3-3", title: "3-03. 건강장애 학생 관리", url: "https://works.do/FPZBRPc" },
+            { id: "sp-3-4", title: "3-04. 순회교육, 위탁교육대상자 관리", url: "https://works.do/5srmge7" },
+            { id: "sp-3-5", title: "3-05. 취학유예 및 면제, 재취학, 정원 외 학적 관리", url: "https://works.do/FYUIRH4" }
+        ]
+    },
+    "4. 특수교육 관련서비스": {
+        icon: "fas fa-hands-helping",
+        color: "blue",
+        items: [
+            { id: "sp-4-1", title: "4-01. 특수교육 지원인력", url: "https://works.do/GLBSneO" },
+            { id: "sp-4-2", title: "4-02. 치료 지원", url: "https://works.do/xJLqDye" },
+            { id: "sp-4-3", title: "4-03. 특기적성교육 지원", url: "https://works.do/GXkqijE" },
+            { id: "sp-4-4", title: "4-04. 통학비 지원", url: "https://works.do/GGo8kIs" },
+            { id: "sp-4-5", title: "4-05. 보조공학 기기 및 학습보조기기 지원", url: "https://works.do/GAeBDHS" }
+        ]
+    },
+    "5. 지원센터 및 특수교육원 업무": {
+        icon: "fas fa-building",
+        color: "teal",
+        items: [
+            { id: "sp-5-1", title: "5-01. 특수교육지원센터 특수교육지원 업무", url: "https://works.do/xwnWxXr" },
+            { id: "sp-5-2", title: "5-02. 특수교육지원센터 특수교육관련서비스 업무", url: "https://works.do/FNQGjOL" },
+            { id: "sp-5-3", title: "5-03. 경상남도교육청 특수교육원 업무", url: "https://works.do/FEZN2bO" }
+        ]
+    },
+    "6. 각종 대회 및 행사 지원": {
+        icon: "fas fa-trophy",
+        color: "amber",
+        items: [
+            { id: "sp-6-1", title: "6-01. 전국장애학생체육대회", url: "https://works.do/FEZN2bA" },
+            { id: "sp-6-2", title: "6-02. 전국장애학생 직업기능경진대회", url: "https://works.do/xsj8gNm" },
+            { id: "sp-6-3", title: "6-03. 전국장애학생 e페스티벌", url: "https://works.do/FHcAeae" },
+            { id: "sp-6-4", title: "6-04. 경상남도교육감기 장애학생체육대회", url: "https://works.do/GPvXNmV" },
+            { id: "sp-6-5", title: "6-05. 장애학생 건강체력 측정평가(PAPS-D)", url: "https://works.do/xBYsdc2" },
+            { id: "sp-6-6", title: "6-06. 체육 활동 지원", url: "https://works.do/GHsVtjs" }
+        ]
+    }
+};
+
+const adminData = {
+    "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            {
+                id: "a-0-1",
+                title: "0. 일러두기 및 목록",
+                url: "https://works.do/Fevp7d0"
+            }
+        ]
+    },
+    "1. 업무포털시스템": {
+        icon: "fas fa-archive",
+        color: "emerald",
+        items: [
+            { id: "a-1-1", title: "1-01. 업무포털", url: "https://works.do/GPvXNmS" },
+            { id: "a-1-2", title: "1-02. 교육행정데이터통합관리", url: "https://works.do/xHkDfv6" }
+        ]
+    },
+    "2. K-에듀파인": {
+        icon: "fas fa-money-check-alt",
+        color: "blue",
+        items: [
+            { id: "a-2-1", title: "2-01. K-에듀파인", url: "https://works.do/GK7x89w" },
+            { id: "a-2-2", title: "2-02. 문서관리", url: "https://works.do/F8GbqEP" },
+            { id: "a-2-3", title: "2-03. 업무인계인수", url: "https://works.do/GULthbE" },
+            { id: "a-2-4", title: "2-04. 업무지원", url: "https://works.do/FWrfVMJ" },
+            { id: "a-2-5", title: "2-05. 학교회계", url: "https://works.do/FDWj0ok" }
+        ]
+    },
+    "3. 나이스": {
+        icon: "fas fa-desktop",
+        color: "fuchsia",
+        items: [
+            { id: "a-3-1", title: "3-01. 4세대 나이스", url: "https://works.do/54Qxhsz" },
+            { id: "a-3-2", title: "3-02. 개인복무", url: "https://works.do/IGuKw07" },
+            { id: "a-3-3", title: "3-03. 전입·전출", url: "https://works.do/F4X0jTn" },
+            { id: "a-3-4", title: "3-04. 교과용도서", url: "https://works.do/IgIDWsg" },
+            { id: "a-3-5", title: "3-05. 학교일지", url: "https://works.do/Fb9zshN" },
+            { id: "a-3-6", title: "3-06. 학교정보공시", url: "https://works.do/xjXJuSm" },
+            { id: "a-3-7", title: "3-07. 학부모 서비스 승인", url: "https://works.do/GoO29ds" },
+            { id: "a-3-8", title: "3-08. 수상대장", url: "https://works.do/xDKjRH5" }
+        ]
+    },
+    "4. 교무행정": {
+        icon: "fas fa-tasks",
+        color: "violet",
+        items: [
+            { id: "a-4-1", title: "4-01. 학교누리집", url: "https://works.do/FLHhl74" },
+            { id: "a-4-2", title: "4-02. 홍보관리", url: "https://works.do/xKYzBVB" },
+            { id: "a-4-3", title: "4-03. 개인정보보호", url: "https://works.do/FFQShpo" },
+            { id: "a-4-4", title: "4-04. 기록대장관리", url: "https://works.do/GO2zbLj" }
+        ]
+    },
+    "5. 디지털프로그램": {
+        icon: "fas fa-laptop-code",
+        color: "cyan",
+        items: [
+            { id: "a-5-1", title: "5-01. 아이톡톡", url: "https://works.do/FCX4IWr" },
+            { id: "a-5-2", title: "5-02. 경남교육메신저", url: "https://works.do/FSV5ahe" },
+            { id: "a-5-3", title: "5-03. 프로그램활용", url: "https://works.do/5IgTyrh" }
+        ]
+    },
+    "6. 바로사용서식": {
+        icon: "fas fa-file-invoice",
+        color: "amber",
+        items: [
+            { id: "a-6-1", title: "6-01. 입학식", url: "https://works.do/xcW9EQZ" },
+            { id: "a-6-2", title: "6-02. 체육대회", url: "https://works.do/GzbgO86" },
+            { id: "a-6-3", title: "6-03. 학예회·축제", url: "https://works.do/5pUHfid" },
+            { id: "a-6-4", title: "6-04. 졸업식", url: "https://works.do/FLHhlZf" },
+            { id: "a-6-5", title: "6-05. 각종 설명회", url: "https://works.do/G3LXWuN" },
+            { id: "a-6-6", title: "6-06. 공통 행정 서식", url: "https://works.do/Gp9f1sd" },
+            { id: "a-6-7", title: "6-07. 바로 출력", url: "https://works.do/GaD268Z" }
+        ]
+    }
+};
+
+const staffData = {
+    "0. 일러두기 및 목록": {
+        icon: "fas fa-exclamation",
+        color: "red",
+        items: [
+            {
+                id: "st-0-1",
+                title: "0. 일러두기 및 목록",
+                url: "https://works.do/GTWerVf"
+            }
+        ]
+    },
+    "1. 행정일반": {
+        icon: "fas fa-clipboard-list",
+        color: "emerald",
+        items: [
+            { id: "st-1-1", title: "1-1. 민원정보공개", url: "https://works.do/xgkuWDN" },
+            { id: "st-1-2", title: "1-2. 행정업무운영", url: "https://works.do/5lMxlKH" },
+            { id: "st-1-3", title: "1-3. 보안관리", url: "https://works.do/FskqEHU" },
+            { id: "st-1-4", title: "1-4. 산업안전보건", url: "https://works.do/xrtcLaV" }
+        ]
+    },
+    "2. 인사": {
+        icon: "fas fa-users-cog",
+        color: "pink",
+        items: [
+            { id: "st-2-1", title: "2-1. 지방공무원", url: "https://works.do/xgkuWDi" },
+            { id: "st-2-2", title: "2-2. 교육공무직원", url: "https://works.do/FPZBR3H" },
+            { id: "st-2-3", title: "2-3. 복무관리", url: "https://works.do/FjlcyV0" },
+            { id: "st-2-4", title: "2-4. 보수관리(급여)", url: "https://works.do/5QFuevl" }
+        ]
+    },
+    "3. 학교회계": {
+        icon: "fas fa-calculator",
+        color: "fuchsia",
+        items: [
+            { id: "st-3-1", title: "3-1. 예ㆍ결산 관리", url: "https://works.do/xHkDfNV" },
+            { id: "st-3-2", title: "3-2. 수입관리", url: "https://works.do/xUBF0Cn" },
+            { id: "st-3-3", title: "3-3. 지출관리", url: "https://works.do/Gj3ZD5a" },
+            { id: "st-3-4", title: "3-4. 계약관리", url: "https://works.do/F8GbqtG" },
+            { id: "st-3-5", title: "3-5. 세입세출외현금", url: "https://works.do/G5ZJoX8" },
+            { id: "st-3-6", title: "3-6. 학교발전기금", url: "https://works.do/FjlcyzD" }
+        ]
+    },
+    "4. 시설ㆍ물품ㆍ재산": {
+        icon: "fas fa-solid fa-credit-card",
+        color: "cyan",
+        items: [
+            { id: "st-4-1", title: "4-1. 학교시설관리", url: "https://works.do/xrtcLks" },
+            { id: "st-4-2", title: "4-2. 물품관리", url: "https://works.do/5cw2irQ" },
+            { id: "st-4-3", title: "4-3. 공유재산관리", url: "https://works.do/Fq3iNj2" },
+            { id: "st-4-4", title: "4-4. 미래학교 공간재구조화", url: "https://works.do/GW5JhR2" }
+        ]
+    },
+    "5. 학교운영위원회": {
+        icon: "fas fa-landmark",
+        color: "lime",
+        items: [
+            { id: "st-5-1", title: "5. 학교운영위원회", url: "https://works.do/5IgTy0Z" }
+        ]
+    },
+    "6. 신설학교": {
+        icon: "fas fa-solid fa-school",
+        color: "violet",
+        items: [
+            { id: "st-6-1", title: "6. 신설학교", url: "https://works.do/F8Gbqtk" }
+        ]
+    },
+    "7. 감사일반": {
+        icon: "fas fa-gavel",
+        color: "teal",
+        items: [
+            { id: "st-7-1", title: "7. 감사일반", url: "https://works.do/Gg2PTwf" }
+        ]
+    }
+};
+
+</script>
+    <script src="files.js"></script>
+    <script>
+// 경남GPT(웍스AI) 업무 비서 연결표 — https://gov.wrks.ai/ko/agent/start/번호
+// 2026.10.27 경상남도교육청(기관) 에이전트 목록에서 수집. 비서가 새로 생기거나 바뀌면 이 파일만 고치면 됨.
+// [번호, 사이트에 보이는 원래 이름]
+const AGENT_BASE = "https://gov.wrks.ai/ko/agent/start/";
+// 맨 위 안내 줄 — 경남 특화비서 > AI비서 시작하기(전체 길잡이)
+const globalGuide = [11979, "AI비서 시작하기"];
+const makeOwnAgent = [14348, "나만의 비서 만들기"];
+// 분류별 길잡이(○○ 시작하기: 알맞은 비서로 안내)
+const categoryGuides = {
+ "kindergarten": [
+  12299,
+  "유치원 시작하기"
+ ],
+ "elementary": [
+  12295,
+  "초등학교 시작하기"
+ ],
+ "secondary": [
+  12315,
+  "중고등학교 시작하기"
+ ],
+ "special": [
+  12312,
+  "특수학교(급) 시작하기"
+ ],
+ "admin": [
+  11465,
+  "교무행정 시작하기"
+ ],
+ "staff": [
+  11968,
+  "일반행정 시작하기"
+ ]
+};
+// 분류별 통합 비서(○○ 비서: 그 분류 전체)
+const categoryAgents = {
+ "kindergarten": [
+  9375,
+  "유치원 비서"
+ ],
+ "elementary": [
+  9023,
+  "초등학교 비서"
+ ],
+ "secondary": [
+  9690,
+  "중고등학교 비서"
+ ],
+ "special": [
+  9545,
+  "특수학교(급) 비서"
+ ],
+ "admin": [
+  9577,
+  "교무행정(전체) 비서"
+ ],
+ "staff": [
+  8280,
+  "일반행정 비서"
+ ]
+};
+// 묶음(중분류) 통합 비서: 분류 → 묶음 제목 → [번호, 이름]
+const sectionAgents = {
+ "kindergarten": {
+  "1. 학사": [
+   9339,
+   "1. 학사 비서"
+  ],
+  "2. 교육과정": [
+   9342,
+   "2. 교육과정 비서"
+  ],
+  "3. 방과후과정": [
+   9346,
+   "3. 방과후과정 비서"
+  ],
+  "4. 안전ㆍ보건": [
+   9355,
+   "4. 안전·보건 비서"
+  ],
+  "5. 정보": [
+   9357,
+   "5. 정보 비서"
+  ]
+ },
+ "elementary": {
+  "1. 교무": [
+   9141,
+   "1. 교무 비서"
+  ],
+  "2. 연구": [
+   9024,
+   "2. 연구 비서"
+  ],
+  "3. 돌봄·방과후학교·예술": [
+   9278,
+   "4. 돌봄,방과후,예술 비서"
+  ],
+  "4. 정보": [
+   9285,
+   "3. 정보 비서"
+  ],
+  "5. 과학ㆍ수학ㆍ영재ㆍ환경": [
+   9294,
+   "5. 과학,수학,영재,환경 비서"
+  ],
+  "6. 인성": [
+   9287,
+   "6. 인성 비서"
+  ],
+  "7. 체육ㆍ안전": [
+   9291,
+   "7. 체육,안전 비서"
+  ],
+  "9. 저연차(신규, 저경력) 업무 도움자료": [
+   9296,
+   "9. 신규,저경력교사 업무 비서"
+  ]
+ },
+ "secondary": {
+  "1. 교무": [
+   9543,
+   "1. 교무 비서"
+  ],
+  "2. 교육과정·평가": [
+   9320,
+   "2. 교육과정, 평가 비서"
+  ],
+  "3. 연구": [
+   9499,
+   "3. 연구 비서"
+  ],
+  "4. 정보": [
+   9496,
+   "4. 정보 비서"
+  ],
+  "5. 과학ㆍ수학ㆍ영재ㆍ환경": [
+   9495,
+   "5. 과학·수학·영재·환경 비서"
+  ],
+  "6. 인성": [
+   9471,
+   "6. 인성 비서"
+  ],
+  "7. 체육ㆍ안전": [
+   9390,
+   "7. 체육, 안전 비서"
+  ]
+ },
+ "special": {
+  "1. 특수교육 교육과정 편성ㆍ운영": [
+   9384,
+   "1. 특수교육 교육과정 편성·운영 비서"
+  ],
+  "2. 개별화 교육계획 작성 활용": [
+   9461,
+   "2. 개별화 교육계획 비서"
+  ],
+  "3. 특수교육대상자 학적 관리": [
+   9468,
+   "3. 특수교육대상자 학적관리 비서"
+  ],
+  "4. 특수교육 관련서비스": [
+   9475,
+   "4. 특수교육 관련서비스 비서"
+  ],
+  "5. 지원센터 및 특수교육원 업무": [
+   9479,
+   "5. 지원센터 및 특수교육원 비서"
+  ],
+  "6. 각종 대회 및 행사 지원": [
+   9481,
+   "6. 각종대회 및 행사지원 비서"
+  ]
+ },
+ "admin": {
+  "1. 업무포털시스템": [
+   9933,
+   "1. 업무포털시스템 비서"
+  ],
+  "2. K-에듀파인": [
+   18182,
+   "2. K-에듀파인 비서"
+  ],
+  "3. 나이스": [
+   7922,
+   "3. 나이스 비서"
+  ],
+  "4. 교무행정": [
+   9934,
+   "4. 교무행정 비서"
+  ],
+  "5. 디지털프로그램": [
+   9935,
+   "5. 디지털프로그램 비서"
+  ],
+  "6. 바로사용서식": [
+   9936,
+   "6. 바로사용서식 비서"
+  ]
+ },
+ "staff": {
+  "1. 행정일반": [
+   8276,
+   "1. 행정일반 비서"
+  ],
+  "2. 인사": [
+   8277,
+   "2. 인사 비서"
+  ],
+  "3. 학교회계": [
+   8287,
+   "3. 학교회계 비서"
+  ],
+  "4. 시설ㆍ물품ㆍ재산": [
+   8288,
+   "4. 시설·물품·재산 비서"
+  ]
+ }
+};
+// 항목(소분류) 비서: 자료 항목 ID → 번호
+const agentLinks = {"k-1-1":8154,"k-1-2":8157,"k-1-3":8160,"k-2-1":8169,"k-2-2":8171,"k-2-3":8173,"k-2-4":8175,"k-2-5":8177,"k-2-6":8179,"k-2-7":8181,"k-2-8":8183,"k-2-9":8185,"k-2-10":8188,"k-3-1":8189,"k-3-2":8191,"k-4-1":8194,"k-4-2":8195,"k-4-3":8196,"k-4-4":8200,"k-4-5":8201,"k-4-6":8202,"k-4-7":8204,"k-4-8":8206,"k-5-1":8141,"k-5-2":8143,"k-5-3":8147,"k-5-4":8149,"k-5-5":8151,"e-1-1":9034,"e-1-2":9195,"e-1-3":9199,"e-1-4":9201,"e-1-5":9202,"e-1-6":9203,"e-1-7":9204,"e-1-8":9205,"e-1-9":9206,"e-1-10":9208,"e-1-11":9209,"e-2-1":9559,"e-2-2":9560,"e-2-3":9561,"e-2-4":9563,"e-2-5":9564,"e-2-6":9566,"e-2-7":9568,"e-2-8":9569,"e-2-9":9570,"e-2-10":9572,"e-2-11":9369,"e-2-12":9370,"e-3-1":9210,"e-3-2":9211,"e-4-1":9681,"e-4-2":9695,"e-4-3":9697,"e-4-4":9699,"e-4-5":9701,"e-4-6":9703,"e-4-7":9704,"e-4-8":9706,"e-4-9":9708,"e-5-1":9212,"e-5-2":9213,"e-5-3":9214,"e-5-4":9215,"e-5-5":9216,"e-5-6":9217,"e-6-1":9218,"e-6-2":9219,"e-6-3":9220,"e-6-4":9221,"e-6-5":9222,"e-6-6":9223,"e-6-7":9224,"e-6-8":9225,"e-6-9":9226,"e-7-1":9361,"e-7-2":9362,"e-7-3":9363,"e-7-4":9364,"e-7-5":9365,"e-7-6":9366,"e-7-7":9367,"e-7-8":9368,"e-8-1":9295,"e-9-1":11771,"e-9-2":11772,"s-1-1":7958,"s-1-2":7959,"s-1-3":7960,"s-1-4":7961,"s-1-5":7962,"s-1-6":7963,"s-1-7":7964,"s-1-8":7965,"s-1-9":7966,"s-1-10":7967,"s-1-11":7968,"s-2-1":7970,"s-2-2":7971,"s-2-3":7972,"s-2-4":7973,"s-2-5":7974,"s-2-6":7975,"s-2-7":7976,"s-2-8":7977,"s-2-9":7978,"s-2-10":7979,"s-2-11":7980,"s-2-12":7981,"s-3-1":8231,"s-3-2":8232,"s-3-3":8234,"s-3-4":8235,"s-3-5":8236,"s-3-6":8237,"s-3-7":8238,"s-3-8":8239,"s-3-9":8240,"s-3-10":8241,"s-4-1":8242,"s-4-2":8243,"s-4-3":8244,"s-4-4":8245,"s-4-5":8246,"s-4-6":8247,"s-4-7":8248,"s-4-8":8251,"s-5-1":8252,"s-5-2":8253,"s-5-3":8254,"s-5-4":8255,"s-5-5":8256,"s-5-6":8257,"s-5-7":8258,"s-5-8":8259,"s-5-9":8260,"s-6-1":8261,"s-6-2":8262,"s-6-3":8263,"s-6-4":8264,"s-6-5":8265,"s-6-6":8266,"s-6-7":8267,"s-6-8":8268,"s-6-9":8269,"s-6-10":8270,"s-7-1":7567,"s-7-2":7575,"s-7-3":7583,"s-7-4":7946,"s-7-5":7949,"s-7-6":7950,"s-7-7":7951,"s-7-8":7952,"s-7-9":7953,"s-7-10":7954,"s-7-11":7955,"s-7-12":7956,"s-8-1":8353,"sp-1-1":9146,"sp-1-2":9327,"sp-1-3":9328,"sp-1-4":9329,"sp-1-5":9332,"sp-1-6":9333,"sp-1-7":9334,"sp-1-8":9377,"sp-1-9":9378,"sp-2-1":9189,"sp-2-2":9252,"sp-3-1":9396,"sp-3-2":9399,"sp-3-3":9402,"sp-3-4":9404,"sp-3-5":9406,"sp-4-1":9379,"sp-4-2":9380,"sp-4-3":9381,"sp-4-4":9383,"sp-4-5":9382,"sp-5-1":9255,"sp-5-2":9259,"sp-5-3":9262,"sp-6-1":9267,"sp-6-2":9271,"sp-6-3":9273,"sp-6-4":9275,"sp-6-5":9277,"sp-6-6":9324,"a-1-1":7913,"a-1-2":7914,"a-2-1":9914,"a-2-2":9915,"a-2-3":9916,"a-2-4":9917,"a-2-5":9918,"a-3-1":9919,"a-3-2":9920,"a-3-3":7916,"a-3-4":9921,"a-3-5":9922,"a-3-6":9923,"a-3-7":9924,"a-3-8":9925,"a-4-1":7900,"a-4-2":7902,"a-4-3":7903,"a-4-4":7906,"a-5-1":7908,"a-5-2":7910,"a-5-3":7911,"a-6-1":9926,"a-6-2":9927,"a-6-3":9928,"a-6-4":9929,"a-6-5":9930,"a-6-6":9931,"a-6-7":9932,"st-1-1":8139,"st-1-2":8144,"st-1-3":8150,"st-1-4":8153,"st-2-1":8156,"st-2-2":8162,"st-2-3":8164,"st-2-4":8172,"st-3-1":8176,"st-3-2":8187,"st-3-3":8142,"st-3-4":8148,"st-3-5":8159,"st-3-6":8163,"st-4-1":8165,"st-4-2":8170,"st-4-3":8174,"st-4-4":8182,"st-5-1":8186,"st-6-1":8190,"st-7-1":8192};
+// 경남 특화비서 카드(맨 마지막 칸): 자료 카드와 같은 모양, 항목은 비서 링크
+const gyeongnamData = {
+ "학생부·학사": {
+  "icon": "fas fa-user-graduate",
+  "color": "teal",
+  "items": [
+   {
+    "id": "gn-13317",
+    "title": "유치원 유아발달상황 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/13317",
+    "agent": 13317,
+    "orig": "유치원[유아발달상황] 비서"
+   },
+   {
+    "id": "gn-14891",
+    "title": "초등 학생부 비서 (교과·행동·점검)",
+    "url": "https://gov.wrks.ai/ko/agent/start/14891",
+    "agent": 14891,
+    "orig": "초등[학생부: 교과, 행동, 점검] 비서"
+   },
+   {
+    "id": "gn-14890",
+    "title": "중학교 학생부 비서 (교과·행동·교과외·점검)",
+    "url": "https://gov.wrks.ai/ko/agent/start/14890",
+    "agent": 14890,
+    "orig": "중학교[학생부: 교과,행동,교과외,점검] 비서"
+   },
+   {
+    "id": "gn-14886",
+    "title": "고등학교 학생부 비서 (교과·행동·점검)",
+    "url": "https://gov.wrks.ai/ko/agent/start/14886",
+    "agent": 14886,
+    "orig": "고등학교[학생부: 교과, 행동, 점검] 비서"
+   },
+   {
+    "id": "gn-15388",
+    "title": "학사일정 캘린더 자동 등록 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/15388",
+    "agent": 15388,
+    "orig": "학사일정 캘린더 자동 등록 비서"
+   },
+   {
+    "id": "gn-15256",
+    "title": "범교과 및 계기교육 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/15256",
+    "agent": 15256,
+    "orig": "범교과 및 계기교육 비서"
+   }
+  ]
+ },
+ "문서 작성": {
+  "icon": "fas fa-pen-nib",
+  "color": "teal",
+  "items": [
+   {
+    "id": "gn-18567",
+    "title": "가정통신문 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/18567",
+    "agent": 18567,
+    "orig": "가정통신문 비서"
+   },
+   {
+    "id": "gn-16844",
+    "title": "다문화학생 가정통신문 번역 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/16844",
+    "agent": 16844,
+    "orig": "다문화학생 가정통신문 번역 비서"
+   },
+   {
+    "id": "gn-7533",
+    "title": "공문 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/7533",
+    "agent": 7533,
+    "orig": "공문 비서"
+   },
+   {
+    "id": "gn-15389",
+    "title": "공문 요약 및 교직원 안내 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/15389",
+    "agent": 15389,
+    "orig": "공문 요약 및 교직원 안내 비서"
+   },
+   {
+    "id": "gn-7555",
+    "title": "회의록 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/7555",
+    "agent": 7555,
+    "orig": "회의록 비서"
+   },
+   {
+    "id": "gn-7547",
+    "title": "보도자료 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/7547",
+    "agent": 7547,
+    "orig": "보도자료 비서"
+   },
+   {
+    "id": "gn-7551",
+    "title": "연설문 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/7551",
+    "agent": 7551,
+    "orig": "연설문 비서"
+   },
+   {
+    "id": "gn-13137",
+    "title": "채용공고 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/13137",
+    "agent": 13137,
+    "orig": "채용공고 비서"
+   },
+   {
+    "id": "gn-17645",
+    "title": "전달 연수 PPT 제작 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/17645",
+    "agent": 17645,
+    "orig": "전달 연수 PPT 제작 비서"
+   },
+   {
+    "id": "gn-7557",
+    "title": "파워포인트 초안 작성",
+    "url": "https://gov.wrks.ai/ko/agent/start/7557",
+    "agent": 7557,
+    "orig": "파워포인트 초안 작성"
+   }
+  ]
+ },
+ "행정 지원": {
+  "icon": "fas fa-scale-balanced",
+  "color": "teal",
+  "items": [
+   {
+    "id": "gn-7544",
+    "title": "민원 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/7544",
+    "agent": 7544,
+    "orig": "민원 비서"
+   },
+   {
+    "id": "gn-13208",
+    "title": "감사 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/13208",
+    "agent": 13208,
+    "orig": "감사 비서"
+   },
+   {
+    "id": "gn-13119",
+    "title": "계약 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/13119",
+    "agent": 13119,
+    "orig": "계약 비서"
+   },
+   {
+    "id": "gn-22666",
+    "title": "초중등 호봉획정 비서",
+    "url": "https://gov.wrks.ai/ko/agent/start/22666",
+    "agent": 22666,
+    "orig": "초중등 호봉획정 비서"
+   }
+  ]
+ }
+};
+// 보여 줄 때만 바꾸는 이름(원본 data.js는 그대로 — 자동 갱신돼도 유지)
+const titleRenames = {
+ "8. (초등)교감업무도움자료": "8. 초등교감업무도움자료",
+ "8. (중등)교감업무도움자료": "8. 중등교감업무도움자료"
+};
+
+</script>
+    <script>
+// ── 카테고리 설정 (data.js의 전역 데이터를 prefix로 매핑) ──────────────
+// 6개 카테고리마다 함수를 복제하지 않고, 이 한 곳의 설정으로 일반화한다.
+const CATEGORY_DATA = {
+    kindergarten: kindergartenData,
+    elementary: elementaryData,
+    secondary: secondaryData,
+    special: specialData,
+    admin: adminData,
+    staff: staffData,
+};
+
+// 카테고리 메타데이터 (통합 검색 결과 머리글용 — 라벨/아이콘/색, index.html 카드와 일치)
+const CATEGORY_META = {
+    kindergarten: { label: '유치원', icon: 'fas fa-child', color: 'blue' },
+    elementary:   { label: '초등학교', icon: 'fas fa-book', color: 'green' },
+    secondary:    { label: '중고등학교', icon: 'fas fa-chalkboard', color: 'purple' },
+    special:      { label: '특수학교(급)', icon: 'fas fa-heart', color: 'orange' },
+    admin:        { label: '교무행정', icon: 'fas fa-tag', color: 'amber' },
+    staff:        { label: '일반행정', icon: 'fas fa-file', color: 'red' },
+    gyeongnam:    { label: '경남 특화비서', icon: 'fas fa-star', color: 'teal' },
+};
+// 맨 마지막 칸 '경남 특화비서'(data-agents.js) — 자료 카드와 같은 방식으로 펼침·검색
+if (typeof gyeongnamData !== 'undefined') CATEGORY_DATA.gyeongnam = gyeongnamData;
+// 보여 줄 때만 바꾸는 이름(data-agents.js의 titleRenames) — 묶음 제목과 항목 제목 모두
+if (typeof titleRenames !== 'undefined') {
+    for (const [prefix, data] of Object.entries(CATEGORY_DATA)) {
+        const renamed = {};
+        for (const [title, sec] of Object.entries(data)) {
+            (sec.items || []).forEach(it => { if (titleRenames[it.title]) it.title = titleRenames[it.title]; });
+            renamed[titleRenames[title] || title] = sec;
+        }
+        CATEGORY_DATA[prefix] = renamed;
+    }
+}
+
+// 카드별 '이미 렌더됨' 여부 (첫 펼침에만 렌더)
+const sectionsRendered = {};
+
+// ── 보안 헬퍼 ────────────────────────────────────────────────────────
+// innerHTML로 삽입되는 텍스트(제목 등)를 이스케이프해 XSS를 방어한다.
+function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+    ));
+}
+
+// http(s) 링크만 허용 (javascript: 등 위험한 스킴 차단)
+function safeUrl(url) {
+    return /^https?:\/\//i.test(url) ? url : '#';
+}
+
+// ── 경남GPT(웍스AI) 업무 비서 연결 (data-agents.js) ─────────────────
+const HAS_AGENTS = typeof agentLinks !== 'undefined';
+function agentUrl(id) { return id ? AGENT_BASE + encodeURIComponent(id) : ''; }
+// 항목 오른쪽 [비서] 단추
+function agentButtonHTML(itemId, title) {
+    const id = HAS_AGENTS && agentLinks[itemId];
+    if (!id) return '';
+    return `<a href="${agentUrl(id)}" target="_blank" rel="noopener noreferrer"
+        title="경남GPT ‘${escapeHtml(title)}’ 비서와 대화하기"
+        class="agent-btn flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 whitespace-nowrap rounded-full text-xs font-bold text-white bg-[#1f6b5a] border border-[#1f6b5a] hover:bg-[#164f42] hover:border-[#164f42] shadow-sm transition-colors duration-150">
+        <span class="text-[11px] leading-none">✦</span><span>비서</span></a>`;
+}
+// 항목 오른쪽 [자료] 단추 (웹하드 폴더·파일 열기)
+function dataButtonHTML(url) {
+    if (!url) return '';
+    return `<a href="${safeUrl(url)}" target="_blank" rel="noopener noreferrer"
+        title="웹하드 자료 열기"
+        class="data-btn flex-shrink-0 inline-flex items-center gap-1 px-2 py-1 whitespace-nowrap rounded-full text-xs font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 shadow-sm transition-colors duration-150">
+        <i class="fas fa-folder text-amber-400 text-[11px]"></i><span>자료</span></a>`;
+}
+// 사이트 이름 → 페이지에서 쓰는 이름 ('1. 교무 비서' → '교무 통합 비서')
+function sectionAgentName(pair) {
+    return pair[1].replace(/^\d+\.\s*/, '').replace(/\s*비서$/, '').replace(/\s*,\s*/g, '·') + ' 통합 비서';
+}
+// 묶음 맨 위 '통합 비서' 줄
+function agentBannerHTML(pair, name, label) {
+    if (!pair) return '';
+    return `<a href="${agentUrl(pair[0])}" target="_blank" rel="noopener noreferrer" title="사이트 이름: ${escapeHtml(pair[1])}"
+        class="flex items-center gap-2 px-4 py-2.5 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 transition-colors duration-150 group">
+        <i class="fas fa-robot text-sm"></i>
+        <span class="flex-grow min-w-0 leading-tight"><span class="text-sm font-semibold">${escapeHtml(name)}</span>${label ? `<span class="block text-xs text-indigo-500 mt-0.5">${escapeHtml(label)}</span>` : ''}</span>
+        <span class="text-xs text-indigo-500 group-hover:text-indigo-700 whitespace-nowrap flex-shrink-0">대화하기 <i class="fas fa-arrow-right ml-0.5"></i></span></a>`;
+}
+// 분류를 펼친 맨 위: [길잡이] [통합 비서] 두 칸
+function guideTileHTML(pair, icon, name, desc, tone) {
+    if (!pair) return '';
+    const t = tone === 'guide'
+        ? 'bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800'
+        : 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100 text-indigo-800';
+    return `<a href="${agentUrl(pair[0])}" target="_blank" rel="noopener noreferrer" title="사이트 이름: ${escapeHtml(pair[1])}"
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-lg border ${t} transition-colors duration-150 group">
+        <i class="${icon} text-base flex-shrink-0 w-4 text-center"></i>
+        <span class="min-w-0 flex-grow leading-tight"><span class="block text-sm font-bold">${escapeHtml(name)}</span><span class="block text-xs opacity-80 mt-0.5">${escapeHtml(desc)}</span></span>
+        <i class="fas fa-arrow-right text-xs opacity-60 group-hover:opacity-100 flex-shrink-0"></i></a>`;
+}
+function guideStripHTML(prefix) {
+    if (!HAS_AGENTS) return '';
+    let a, b;
+    if (prefix === 'gyeongnam') {
+        a = guideTileHTML(globalGuide, 'fas fa-compass', 'AI 비서 길잡이', '어떤 비서를 활용할지 모르겠다면?', 'guide');
+        b = guideTileHTML(makeOwnAgent, 'fas fa-screwdriver-wrench', '나만의 비서 만들기', '내 업무에 맞는 비서를 직접 만들어요', 'agent');
+    } else {
+        const label = (CATEGORY_META[prefix] || {}).label || '';
+        a = guideTileHTML(categoryGuides[prefix], 'fas fa-compass', `${label} 길잡이`, '어느 비서에 물어볼지 모를 때', 'guide');
+        b = guideTileHTML(categoryAgents[prefix], 'fas fa-robot', `${label} 통합 비서`, `${label} 업무 전체를 한 번에 물어볼 때`, 'agent');
+    }
+    return (a || b) ? `<div class="grid grid-cols-1 gap-2 mb-4 card-entrance">${a}${b}</div>` : '';
+}
+
+// 섹션 고유 id 생성 — 렌더와 검색에서 동일하게 써야 토글이 맞물린다.
+function makeSectionId(typePrefix, title) {
+    return `${typePrefix}-section-${title.replace(/[^a-zA-Z0-9ㄱ-ㅎㅏ-ㅣ가-힣]/g, '')}`;
+}
+
+// ── 최상위 카드 펼침/접힘 ────────────────────────────────────────────
+function toggleSection(sectionId) {
+    const content = document.getElementById(`${sectionId}-content`);
+    const arrow = document.getElementById(`${sectionId}-arrow`);
+    if (!content) return;
+
+    const button = arrow
+        ? arrow.closest('button')
+        : document.querySelector(`button[onclick="toggleSection('${sectionId}')"]`);
+
+    if (!content.classList.contains('open')) {
+        content.classList.add('open');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        if (button) { button.classList.remove('rounded-lg'); button.classList.add('rounded-t-lg'); }
+
+        if (!sectionsRendered[sectionId]) {
+            renderSections(sectionId);
+            sectionsRendered[sectionId] = true;
+        } else {
+            replaySubSectionAnimations(sectionId);
+        }
+    } else {
+        content.classList.remove('open');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (button) { button.classList.remove('rounded-t-lg'); button.classList.add('rounded-lg'); }
+    }
+}
+
+// ── 카테고리 내부 섹션 렌더 ──────────────────────────────────────────
+function renderSections(prefix) {
+    const container = document.getElementById(`${prefix}-sections`);
+    if (!container) return;
+    container.innerHTML = '';
+    if (prefix === 'gyeongnam') { renderGyeongnam(container); return; }
+    const strip = guideStripHTML(prefix);
+    if (strip) container.insertAdjacentHTML('beforeend', strip);
+    Object.entries(CATEGORY_DATA[prefix]).forEach(([sectionTitle, sectionData], index) => {
+        container.appendChild(createDetailedSectionHTML(sectionTitle, sectionData, prefix, index));
+    });
+}
+
+function createDetailedSectionHTML(title, data, typePrefix, index = 0) {
+    const sectionElement = document.createElement('div');
+    sectionElement.className = 'mb-4 border border-gray-200 rounded-lg overflow-hidden shadow-xs card-entrance';
+    sectionElement.style.animationDelay = `${index * 60}ms`;
+
+    const sectionId = makeSectionId(typePrefix, title);
+
+    sectionElement.innerHTML = `
+        <button
+            onclick="toggleDetailedSubSection('${sectionId}')"
+            class="w-full p-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors duration-200 bg-white"
+        >
+            <div class="flex items-center">
+                <div class="w-8 h-8 bg-${data.color}-100 rounded-md flex items-center justify-center mr-3">
+                    <i class="${data.icon} text-${data.color}-600 text-sm"></i>
+                </div>
+                <span class="font-medium text-gray-800">${escapeHtml(title)}</span>
+            </div>
+            <i class="fas fa-chevron-down text-gray-400 transition-transform duration-200" id="${sectionId}-arrow"></i>
+        </button>
+
+        <div id="${sectionId}-content" class="slide-content">
+            <div>
+                <div class="bg-gray-50 border-t border-gray-200">
+                    ${HAS_AGENTS && sectionAgents[typePrefix] && sectionAgents[typePrefix][title]
+                        ? `<div class="border-b border-gray-100">${agentBannerHTML(sectionAgents[typePrefix][title], sectionAgentName(sectionAgents[typePrefix][title]), sectionAgentName(sectionAgents[typePrefix][title]).replace(/ 통합 비서$/, '') + ' 업무 전체를 한 번에 물어볼 때')}</div>` : ''}
+                    ${data.items.map(item => item.agent ? `
+                        <div class="px-4 py-2 border-b border-gray-100 last:border-b-0">
+                            <a href="${safeUrl(item.url)}" target="_blank" rel="noopener noreferrer"
+                                title="${item.orig && item.orig !== item.title ? '사이트 이름: ' + escapeHtml(item.orig) : '경남GPT 비서와 대화하기'}"
+                                class="flex items-center text-gray-700 hover:text-teal-700 hover:bg-white p-2 rounded-md transition-all duration-200 group">
+                                <i class="fas fa-robot text-teal-500 mr-3 text-sm flex-shrink-0"></i>
+                                <span class="item-title text-sm flex-grow">${escapeHtml(item.title)}</span>
+                                <span class="text-xs text-teal-600 opacity-70 group-hover:opacity-100 whitespace-nowrap ml-2">대화하기 <i class="fas fa-arrow-right ml-0.5"></i></span>
+                            </a>
+                        </div>` : `
+                        <div class="item-row pl-2 pr-2 sm:pr-3 py-1.5 border-b border-gray-100 last:border-b-0 flex items-center gap-1.5">
+                            <a
+                                href="${safeUrl(item.url)}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="웹하드 자료 폴더 열기"
+                                class="flex items-center flex-grow min-w-0 text-gray-700 hover:text-${data.color}-600 hover:bg-white px-1 py-2 rounded-md transition-all duration-200 group"
+                            >
+                                <i class="fas fa-folder text-amber-400 mr-2 text-sm flex-shrink-0"></i>
+                                <span class="item-title text-sm flex-grow">${escapeHtml(item.title)}</span>
+                            </a>
+                            <div class="btn-group">${agentButtonHTML(item.id, item.title)}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+
+    return sectionElement;
+}
+
+// ── 경남 특화비서(가로로 긴 카드): [길잡이][나만의 비서] → [탭 3개] → 고른 탭의 비서 목록 ──
+let gyeongnamTab = '';
+function renderGyeongnam(container) {
+    const data = CATEGORY_DATA.gyeongnam || {};
+    const a = guideTileHTML(globalGuide, 'fas fa-compass', 'AI 비서 길잡이', '어떤 비서를 활용할지 모르겠다면?', 'guide');
+    const b = guideTileHTML(makeOwnAgent, 'fas fa-screwdriver-wrench', '나만의 비서 만들기', '내 업무에 맞는 비서를 직접 만들어요', 'agent');
+    const tabs = Object.entries(data).map(([name, sec]) => {
+        const on = name === gyeongnamTab;
+        return `<button type="button" onclick="selectGyeongnamTab(this.dataset.tab)" data-tab="${escapeHtml(name)}" aria-expanded="${on}"
+            class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-semibold transition-colors duration-150 ${on
+                ? 'bg-teal-600 border-teal-600 text-white'
+                : 'bg-white border-gray-200 text-gray-700 hover:border-teal-400 hover:text-teal-700'}">
+            <i class="${sec.icon}"></i><span>${escapeHtml(name)}</span><span class="text-xs font-medium ${on ? 'text-teal-100' : 'text-gray-400'}">${sec.items.length}</span>
+            <i class="fas fa-chevron-down text-xs transition-transform duration-200 ${on ? 'rotate-180' : ''}"></i></button>`;
+    }).join('');
+    const sec = data[gyeongnamTab];
+    const list = sec ? `<div class="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 card-entrance">${sec.items.map(it => `
+        <a href="${safeUrl(it.url)}" target="_blank" rel="noopener noreferrer"
+            title="${it.orig && it.orig !== it.title ? '사이트 이름: ' + escapeHtml(it.orig) : '경남GPT 비서와 대화하기'}"
+            class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-gray-200 bg-white hover:border-teal-400 hover:bg-teal-50 text-gray-700 hover:text-teal-800 transition-colors duration-150 group">
+            <i class="fas fa-robot text-teal-500 text-sm flex-shrink-0"></i>
+            <span class="text-sm flex-grow min-w-0">${escapeHtml(it.title)}</span>
+            <i class="fas fa-arrow-right text-xs text-teal-500 opacity-50 group-hover:opacity-100 flex-shrink-0"></i>
+        </a>`).join('')}</div>` : '';
+    container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${a}${b}</div>
+        <div class="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">${tabs}</div>
+        ${list}`;
+}
+function selectGyeongnamTab(name) {
+    gyeongnamTab = gyeongnamTab === name ? '' : name;   // 같은 탭을 다시 누르면 닫힘
+    renderGyeongnam(document.getElementById('gyeongnam-sections'));
+}
+
+// ── 섹션 내부 하위 펼침/접힘 ─────────────────────────────────────────
+function toggleDetailedSubSection(sectionId) {
+    const content = document.getElementById(`${sectionId}-content`);
+    const arrow = document.getElementById(`${sectionId}-arrow`);
+    if (!content) return;
+
+    if (!content.classList.contains('open')) {
+        content.classList.add('open');
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    } else {
+        content.classList.remove('open');
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    }
+}
+
+// ── 검색 (카테고리 공통) ─────────────────────────────────────────────
+function searchSection(prefix) {
+    const searchTerm = document.getElementById(`${prefix}-search`).value.toLowerCase();
+    const container = document.getElementById(`${prefix}-sections`);
+    searchDetailedItems(searchTerm, CATEGORY_DATA[prefix], container, prefix);
+}
+
+function searchDetailedItems(searchTerm, dataObject, containerElement, typePrefix) {
+    // 검색어가 비면 전체를 다시 렌더하고 모두 접는다.
+    if (!searchTerm.trim()) {
+        containerElement.innerHTML = '';
+        Object.entries(dataObject).forEach(([sectionTitle, sectionData], index) => {
+            containerElement.appendChild(createDetailedSectionHTML(sectionTitle, sectionData, typePrefix, index));
+        });
+        setTimeout(() => {
+            Object.keys(dataObject).forEach(sectionTitle => {
+                const sectionId = makeSectionId(typePrefix, sectionTitle);
+                const content = document.getElementById(`${sectionId}-content`);
+                const arrow = document.getElementById(`${sectionId}-arrow`);
+                if (content && content.classList.contains('open')) {
+                    content.classList.remove('open');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                }
+            });
+        }, 0);
+        return;
+    }
+
+    // 제목/항목명에 검색어가 포함된 섹션만 추린다.
+    const filteredData = {};
+    Object.entries(dataObject).forEach(([sectionTitle, sectionData]) => {
+        const matchingItems = sectionData.items.filter(item =>
+            item.title.toLowerCase().includes(searchTerm) ||
+            sectionTitle.toLowerCase().includes(searchTerm)
+        );
+        if (matchingItems.length > 0 || sectionTitle.toLowerCase().includes(searchTerm)) {
+            filteredData[sectionTitle] = {
+                ...sectionData,
+                items: sectionTitle.toLowerCase().includes(searchTerm) && matchingItems.length === 0
+                    ? sectionData.items
+                    : matchingItems,
+            };
+        }
+    });
+
+    containerElement.innerHTML = '';
+    if (Object.keys(filteredData).length === 0) {
+        containerElement.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+                <i class="fas fa-search text-2xl mb-2"></i>
+                <p>검색 결과가 없습니다.</p>
+            </div>
+        `;
+        return;
+    }
+
+    // 일치한 섹션은 자동으로 펼친다.
+    Object.entries(filteredData).forEach(([sectionTitle, sectionData], index) => {
+        containerElement.appendChild(createDetailedSectionHTML(sectionTitle, sectionData, typePrefix, index));
+
+        const sectionId = makeSectionId(typePrefix, sectionTitle);
+        const sectionTitleMatches = sectionTitle.toLowerCase().includes(searchTerm);
+        const itemsMatch = sectionData.items.some(item => item.title.toLowerCase().includes(searchTerm));
+
+        if (sectionTitleMatches || itemsMatch) {
+            setTimeout(() => {
+                const content = document.getElementById(`${sectionId}-content`);
+                const arrow = document.getElementById(`${sectionId}-arrow`);
+                if (content && arrow) {
+                    content.classList.add('open');
+                    arrow.style.transform = 'rotate(180deg)';
+                }
+            }, 50);
+        }
+    });
+}
+
+// ── 하위 섹션 등장 애니메이션 재생 ───────────────────────────────────
+function replaySubSectionAnimations(sectionId) {
+    const container = document.getElementById(`${sectionId}-sections`);
+    if (!container) return;
+    container.querySelectorAll('.card-entrance').forEach((el, i) => {
+        el.classList.remove('card-entrance');
+        void el.offsetWidth; // 리플로우 강제 → 애니메이션 재시작
+        el.style.animationDelay = `${i * 60}ms`;
+        el.classList.add('card-entrance');
+    });
+}
+
+// ── 통합·초성 검색 ───────────────────────────────────────────────────
+const CHOSEONG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+// 한글 음절의 초성만 뽑아 잇는다 (비한글은 그대로). 예: "유치원 규칙" → "ㅇㅊㅇ ㄱㅊ"
+function toChoseong(str) {
+    let out = '';
+    for (const ch of str) {
+        const code = ch.charCodeAt(0);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+            out += CHOSEONG[Math.floor((code - 0xAC00) / 588)];
+        } else {
+            out += ch;
+        }
+    }
+    return out;
+}
+
+// 질의가 초성 자모(ㄱ~ㅎ)로만 이뤄졌는가
+function isChoseongQuery(q) {
+    return /[ㄱ-ㅎ]/.test(q) && /^[ㄱ-ㅎ\s]+$/.test(q);
+}
+
+// 텍스트가 검색어에 매칭되는가 — 초성 질의면 초성끼리, 아니면 일반 부분일치
+function matchesQuery(text, query) {
+    const q = query.trim();
+    if (!q) return false;
+    if (isChoseongQuery(q)) {
+        return toChoseong(text).replace(/\s/g, '').includes(q.replace(/\s/g, ''));
+    }
+    return text.toLowerCase().includes(q.toLowerCase());
+}
+
+// 검색어를 한 번에 지우고 탐색 뷰로 복귀 (✕ 버튼)
+function clearGlobalSearch() {
+    const input = document.getElementById('global-search');
+    if (!input) return;
+    input.value = '';
+    globalSearch();   // 결과 숨김 + 탐색 뷰 복귀 + ✕ 버튼 숨김
+    input.focus();
+}
+
+// 검색 결과 필터 ('all' 전체 / 'folder' 폴더 / 'file' 파일)
+let searchFilter = 'all';
+function setSearchFilter(f) {
+    searchFilter = f;
+    globalSearch();
+}
+
+// 전체 카테고리(폴더 + 폴더 안 파일)를 한 번에 검색 → 결과 패널 렌더, 카테고리 탐색 뷰는 숨김
+function globalSearch() {
+    const input = document.getElementById('global-search');
+    const browse = document.getElementById('browse-view');
+    const results = document.getElementById('global-results');
+    if (!input || !browse || !results) return;
+
+    const term = input.value.trim();
+
+    // 검색어 지우기(✕) 버튼: 입력값이 있을 때만 표시
+    const clearBtn = document.getElementById('global-search-clear');
+    if (clearBtn) clearBtn.classList.toggle('hidden', input.value.length === 0);
+
+    // 검색어가 비면 탐색 뷰 복귀
+    if (!term) {
+        results.classList.add('hidden');
+        results.innerHTML = '';
+        browse.classList.remove('hidden');
+        return;
+    }
+
+    browse.classList.add('hidden');
+    results.classList.remove('hidden');
+
+    // 카테고리별로 폴더 매칭 + 폴더 안 파일 매칭 수집
+    const hasFiles = typeof filesData !== 'undefined';
+    const groups = [];
+    let folderTotal = 0, fileTotal = 0;
+    for (const [prefix, data] of Object.entries(CATEGORY_DATA)) {
+        const folderHits = [], fileHits = [];
+        for (const [sectionTitle, section] of Object.entries(data)) {
+            const sectionHit = matchesQuery(sectionTitle, term);
+            for (const item of section.items) {
+                if (sectionHit || matchesQuery(item.title, term) || (item.orig && matchesQuery(item.orig, term))) {
+                    folderHits.push({ id: item.id, title: item.title, url: item.url, sectionTitle, color: section.color, agent: !!item.agent });
+                }
+                if (hasFiles) {
+                    for (const fn of (filesData[item.id] || [])) {
+                        if (matchesQuery(fn, term)) {
+                            fileHits.push({ id: item.id, name: fn, folderTitle: item.title, url: item.url, color: section.color });
+                        }
+                    }
+                }
+            }
+        }
+        folderTotal += folderHits.length;
+        fileTotal += fileHits.length;
+        if (folderHits.length || fileHits.length) groups.push({ prefix, folderHits, fileHits });
+    }
+
+    groups.sort((a, b) => (b.prefix === 'gyeongnam') - (a.prefix === 'gyeongnam'));   // 경남 특화비서 결과를 맨 위로
+    const total = folderTotal + fileTotal;
+    if (!total) {
+        results.innerHTML = `
+            <div class="text-center py-16 text-gray-500">
+                <i class="fas fa-search text-3xl mb-3"></i>
+                <p>"${escapeHtml(term)}"에 대한 검색 결과가 없습니다.</p>
+            </div>`;
+        return;
+    }
+
+    // 폴더/파일 필터 바
+    const filterBtn = (key, label, count) => {
+        const active = searchFilter === key;
+        return `<button type="button" onclick="setSearchFilter('${key}')"
+            class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${active
+                ? 'bg-indigo-600 text-white'
+                : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'}">${label} <span class="${active ? 'text-indigo-100' : 'text-gray-400'}">${count}</span></button>`;
+    };
+    const filterBar = `<div class="flex flex-wrap items-center gap-2 mb-4">
+            ${filterBtn('all', '전체', total)}${filterBtn('folder', '폴더', folderTotal)}${filterBtn('file', '파일', fileTotal)}
+        </div>`;
+
+    const showFolders = searchFilter !== 'file';
+    const showFiles = searchFilter !== 'folder';
+    const FILE_CAP = 300;            // 파일 결과 과다 방지
+    let filesRendered = 0;
+
+    const groupsHtml = groups.map(({ prefix, folderHits, fileHits }) => {
+        const meta = CATEGORY_META[prefix] || { label: prefix, icon: 'fas fa-folder', color: 'gray' };
+        const rows = [];
+        if (showFolders) {
+            for (const h of folderHits) {
+                if (h.agent) {
+                    rows.push(`<a href="${safeUrl(h.url)}" target="_blank" rel="noopener noreferrer"
+                        class="flex items-center px-4 py-2.5 hover:bg-teal-50 transition-colors duration-150 group">
+                        <i class="fas fa-robot text-teal-500 mr-3 text-sm flex-shrink-0"></i>
+                    <span class="item-title text-sm text-gray-800 font-medium flex-grow">${escapeHtml(h.title)}</span>
+                        <span class="text-xs text-gray-400 mr-2 hidden sm:inline">비서 · ${escapeHtml(h.sectionTitle)}</span>
+                        <span class="text-xs text-teal-600 whitespace-nowrap">대화하기 <i class="fas fa-arrow-right ml-0.5"></i></span>
+                    </a>`);
+                    continue;
+                }
+                rows.push(`<div class="item-row flex items-center gap-1.5 pr-2 sm:pr-3 hover:bg-${h.color}-50 transition-colors duration-150"><a href="${safeUrl(h.url)}" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center flex-grow min-w-0 pl-3 pr-1 py-2.5 group">
+                    <i class="fas fa-folder text-amber-400 mr-2 text-sm flex-shrink-0"></i>
+                    <span class="item-title text-sm text-gray-800 font-medium flex-grow">${escapeHtml(h.title)}</span>
+                    <span class="text-xs text-gray-400 mr-2 hidden sm:inline">폴더 · ${escapeHtml(h.sectionTitle)}</span>
+                </a><div class="btn-group">${agentButtonHTML(h.id, h.title)}</div></div>`);
+            }
+        }
+        if (showFiles) {
+            for (const h of fileHits) {
+                if (filesRendered >= FILE_CAP) break;
+                filesRendered++;
+                rows.push(`<div class="item-row flex items-center gap-1.5 pr-2 sm:pr-3 hover:bg-${h.color}-50 transition-colors duration-150"><a href="${safeUrl(h.url)}" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center flex-grow min-w-0 pl-3 pr-1 py-2.5 group">
+                    <i class="fas fa-file-alt text-gray-400 mr-2 text-sm flex-shrink-0"></i>
+                    <span class="item-title text-sm text-gray-700 flex-grow">${escapeHtml(h.name)}</span>
+                    <span class="text-xs text-gray-400 mr-2 hidden sm:inline">${escapeHtml(h.folderTitle)}</span>
+                </a><div class="btn-group">${agentButtonHTML(h.id, h.folderTitle)}</div></div>`);
+            }
+        }
+        if (!rows.length) return '';
+        const cnt = (showFolders ? folderHits.length : 0) + (showFiles ? fileHits.length : 0);
+        return `<div class="mb-6">
+                <div class="flex items-center mb-2">
+                    <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-${meta.color}-100 mr-2">
+                        <i class="${meta.icon} text-${meta.color}-600 text-sm"></i>
+                    </span>
+                    <span class="font-semibold text-gray-800">${escapeHtml(meta.label)}</span>
+                    <span class="text-xs text-gray-400 ml-2">${cnt}건</span>
+                </div>
+                <div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100 overflow-hidden">${rows.join('')}</div>
+            </div>`;
+    }).join('');
+
+    const capNote = (showFiles && fileTotal > FILE_CAP)
+        ? `<p class="text-xs text-amber-600 mb-4">파일 결과가 많아 ${FILE_CAP}개까지만 표시합니다. 검색어를 더 구체적으로 입력해 보세요.</p>`
+        : '';
+
+    results.innerHTML =
+        `<p class="text-sm text-gray-500 mb-3">전체 검색 결과 <b class="text-gray-700">${total}</b>건 <span class="text-gray-400">(폴더 ${folderTotal} · 파일 ${fileTotal})</span></p>` +
+        filterBar + capNote + groupsHtml;
+}
+
+
+// ── 제목이 2번째 줄로 한두 글자만 넘어가면 자간을 줄여 한 줄로 맞춤 ──────────
+(function () {
+    const STEPS = ['-0.02em', '-0.04em', '-0.06em', '-0.075em'];
+    function lineCount(el) {
+        const lh = parseFloat(getComputedStyle(el).lineHeight) || 20;
+        return Math.round(el.getBoundingClientRect().height / lh);
+    }
+    function fitTitle(row) {
+        const t = row.querySelector('.item-title');
+        if (!t) return;
+        const w = Math.round(row.getBoundingClientRect().width);
+        if (!w || row.dataset.fitW == w) return;
+        row.dataset.fitW = w;
+        t.style.letterSpacing = '';
+        if (lineCount(t) !== 2) return;
+        for (const ls of STEPS) {
+            t.style.letterSpacing = ls;
+            if (lineCount(t) === 1) return;
+        }
+        t.style.letterSpacing = '';
+    }
+    if (!('ResizeObserver' in window)) return;
+    const ro = new ResizeObserver(entries => { for (const e of entries) fitTitle(e.target); });
+    const watch = root => {
+        if (root.nodeType !== 1) return;
+        if (root.classList.contains('item-row')) ro.observe(root);
+        root.querySelectorAll && root.querySelectorAll('.item-row').forEach(r => ro.observe(r));
+    };
+    new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(watch)))
+        .observe(document.body, { childList: true, subtree: true });
+    watch(document.body);
+})();
+</script>
+</body>
+</html>
